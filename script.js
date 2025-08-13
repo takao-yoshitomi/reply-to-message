@@ -1,5 +1,3 @@
-import { GoogleAI } from "https://www.gstatic.com/ai/google-web-ai-client.js";
-
 // DOM要素の取得
 const apiKeyInput = document.getElementById('apiKey');
 const receivedMessage = document.getElementById('receivedMessage');
@@ -61,17 +59,31 @@ generateReplyBtn.addEventListener('click', async () => {
     aiReplyBox.textContent = 'AIが返信を生成中です...';
 
     try {
-        const genAI = new GoogleAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro"});
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        aiReplyBox.textContent = text;
-        saveToHistory(settings, prompt, text);
+        const response = await fetch('/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                apiKey: apiKey
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || '不明なエラーが発生しました。');
+        }
+
+        const aiReply = data.reply;
+        aiReplyBox.textContent = aiReply;
+        saveToHistory(settings, prompt, aiReply);
+
     } catch (error) {
         console.error('Error:', error);
-        aiReplyBox.textContent = 'エラーが発生しました。APIキーや設定を確認してください。';
-        alert('エラーが発生しました。詳細はコンソールを確認してください。');
+        aiReplyBox.textContent = `エラーが発生しました: ${error.message}`;
+        alert(`エラーが発生しました: ${error.message}`);
     } finally {
         loader.style.display = 'none';
         generateReplyBtn.disabled = false;
@@ -124,7 +136,11 @@ function getCurrentSettings() {
 
 function createPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
-    return `あなたは優秀なコピーライターです。\n以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。\n\n--- 相手のメッセージ ---\n${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n\n設定:\n-   **役割**: ${settings.userRole || '指定なし'}\n-   **相手との関係性**: ${settings.relationship || '指定なし'}\n-   **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n-   **丁寧度**: ${settings.politeness}\n-   **返信の概算文字数**: ${settings.charCount || '指定なし'}\n-   **句読点**: ${settings.punctuation}\n-   **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n-   **参照情報**:\n${urlsText}\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
+    return `あなたは優秀なコピーライターです。
+以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
+
+--- 相手のメッセージ ---
+${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n\n設定:\n-   **役割**: ${settings.userRole || '指定なし'}\n-   **相手との関係性**: ${settings.relationship || '指定なし'}\n-   **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n-   **丁寧度**: ${settings.politeness}\n-   **返信の概算文字数**: ${settings.charCount || '指定なし'}\n-   **句読点**: ${settings.punctuation}\n-   **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n-   **参照情報**:\n${urlsText}\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
 }
 
 function saveToHistory(settings, prompt, aiReply) {
@@ -205,7 +221,7 @@ function restoreFromHistory(index) {
         addUrlField();
     }
     generatedPrompt.textContent = item.prompt;
-    aiReplyBox.textContent = item.aiReply;
+    aiReplyBox.textContent = item.aiReply || '';
     window.scrollTo(0, 0);
     alert('入力内容を履歴から復元しました。');
 }
