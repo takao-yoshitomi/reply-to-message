@@ -211,7 +211,7 @@ button#addUrlBtn:hover {
     margin: 30px 0;
 }
 
-button#generateReplyBtn {
+button#generateBtn {
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -223,12 +223,12 @@ button#generateReplyBtn {
     transition: background-color 0.3s, transform 0.2s;
 }
 
-button#generateReplyBtn:hover {
+button#generateBtn:hover {
     background-color: var(--hover-color);
     transform: translateY(-2px);
 }
 
-button#generateReplyBtn:disabled {
+button#generateBtn:disabled {
     background-color: #a9cce3;
     cursor: not-allowed;
     transform: none;
@@ -376,4 +376,82 @@ footer {
     margin-top: 40px;
     color: #888;
     font-size: 0.9em;
+}
+
+/* --- Mode Tabs --- */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 25px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    font-size: 1.1em;
+    color: #6c757d;
+    border-bottom: 3px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    font-weight: bold;
+}
+
+.tab-button:hover {
+    color: var(--primary-color);
+}
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- URL List Styles for Question Mode --- */
+#urlContainerQuestion .url-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+button#addUrlBtnQuestion {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+    background-color: #6c757d;
+}
+button#addUrlBtnQuestion:hover {
+    background-color: #5a6268;
+}
+
+/* Adjust output header for new button */
+.output-section .output-header div {
+    display: flex;
+    gap: 10px;
+}
+
+#togglePromptBtn {
+    background-color: #6c757d;
+    font-size: 0.9em;
+    padding: 8px 15px;
+    font-weight: normal;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#togglePromptBtn:hover {
+    background-color: #5a6268;
 }
