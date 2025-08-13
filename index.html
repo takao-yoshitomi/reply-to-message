@@ -16,7 +16,14 @@
                 <h2>API設定</h2>
                 <div class="setting-item">
                     <label for="apiKey">Gemini APIキー:</label>
-                    <input type="password" id="apiKey" placeholder="ここにAPIキーを貼り付け">
+                    <div class="api-key-container">
+                        <input type="password" id="apiKey" placeholder="ここにAPIキーを貼り付け">
+                        <button type="button" id="updateModelsBtn">モデル一覧を更新</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="modelSelector">使用モデル:</label>
+                    <select id="modelSelector"></select>
                 </div>
             </section>
 
