@@ -132,15 +132,32 @@ ${urlsText}
             timestamp.className = 'history-timestamp';
             const date = new Date(item.timestamp);
             timestamp.textContent = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            
             const restoreButton = document.createElement('button');
+            restoreButton.className = 'restore-history-btn';
             restoreButton.textContent = 'この内容を復元';
             restoreButton.addEventListener('click', () => restoreFromHistory(index));
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-history-btn';
+            deleteButton.textContent = '削除';
+            deleteButton.addEventListener('click', () => deleteFromHistory(index));
+
             controlsContainer.appendChild(timestamp);
             controlsContainer.appendChild(restoreButton);
+            controlsContainer.appendChild(deleteButton);
             historyItem.appendChild(promptPreview);
             historyItem.appendChild(controlsContainer);
             historyContainer.appendChild(historyItem);
         });
+    };
+
+    const deleteFromHistory = (index) => {
+        if (!confirm('この履歴を本当に削除しますか？')) return;
+        let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
+        history.splice(index, 1); // 配列から指定されたインデックスの要素を削除
+        localStorage.setItem('promptHistory', JSON.stringify(history));
+        renderHistory(); // 履歴表示を更新
     };
 
     const restoreFromHistory = (index) => {
@@ -154,9 +171,9 @@ ${urlsText}
         sentimentSlider.value = settings.sentiment;
         sentimentValueSpan.textContent = settings.sentiment;
         politenessSlider.value = settings.politeness;
-        politenessValueSpan.textContent = settings.politenessValue;
+        politenessValueSpan.textContent = settings.politeness; // Bug fix: was politenessValue
         charCount.value = settings.charCount;
-        document.querySelector(`input[name="punctuation"][value="${settings.punctuation}"]`).checked = true;
+        document.querySelector(`input[name="punctuation"][value="${settings.punctuation || 'あり'}"]`).checked = true;
         replyContent.value = settings.replyContent;
 
         const radioToSelect = document.getElementById(settings.relationshipRadio);
@@ -171,7 +188,7 @@ ${urlsText}
         if (settings.referenceUrls && settings.referenceUrls.length > 0) {
             settings.referenceUrls.forEach(url => addUrlField(url));
         } else {
-            addUrlField(); // 履歴にURLがない場合は空のフィールドを1つ作成
+            addUrlField();
         }
 
         generatedPrompt.textContent = item.prompt;

@@ -252,25 +252,40 @@ button#generatePrompt:hover {
 .history-controls {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-end;
+    justify-content: flex-start; /* 上から配置 */
+    align-items: stretch; /* 幅を揃える */
     flex-shrink: 0;
+    gap: 8px; /* 要素間のスペース */
 }
 
 .history-timestamp {
     font-size: 0.8em;
     color: #888;
-    margin-bottom: 10px;
+    text-align: center; /* 中央揃え */
 }
 
-.history-item button {
-    background-color: #28a745;
+.history-item .restore-history-btn, .history-item .delete-history-btn {
     font-size: 0.9em;
-    padding: 10px 15px;
-    width: 100%;
+    padding: 8px 12px;
     border-radius: 4px;
     border: none;
     color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.restore-history-btn {
+    background-color: #28a745;
+}
+.restore-history-btn:hover {
+    background-color: #218838;
+}
+
+.delete-history-btn {
+    background-color: var(--danger-color);
+}
+.delete-history-btn:hover {
+    background-color: #c82333;
 }
 
 footer {
