@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>返信文作成アシスタント</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>返信文作成アシスタント</h1>
+        </header>
+        <main>
+            <section class="input-section">
+                <h2>受け取ったメッセージ</h2>
+                <textarea id="receivedMessage" placeholder="ここに相手からのメッセージを貼り付けてください..."></textarea>
+            </section>
+
+            <section class="settings-section">
+                <h2>返答設定</h2>
+                <div class="setting-item">
+                    <label for="userRole">あなたの役割:</label>
+                    <input type="text" id="userRole" placeholder="例: 税理士事務所職員・税理士など" value="税理士事務所職員">
+                </div>
+                <div class="setting-item">
+                    <label>相手との関係性:</label>
+                    <div class="radio-container">
+                        <span class="radio-item"><input type="radio" id="rel_client" name="relationship" value="顧問先" checked><label for="rel_client">顧問先</label></span>
+                        <span class="radio-item"><input type="radio" id="rel_supplier" name="relationship" value="取引先"><label for="rel_supplier">取引先</label></span>
+                        <span class="radio-item"><input type="radio" id="rel_professional" name="relationship" value="士業"><label for="rel_professional">士業</label></span>
+                        <span class="radio-item">
+                            <input type="radio" id="rel_other" name="relationship" value="other">
+                            <label for="rel_other_text">その他:</label>
+                            <input type="text" id="rel_other_text" placeholder="自由入力">
+                        </span>
+                    </div>
+                </div>
+                 <div class="setting-item">
+                    <label for="sentiment">感情の方向性 (否定的-100 / 肯定的100): <span id="sentimentValue">100</span></label>
+                    <input type="range" id="sentiment" min="-100" max="100" value="100">
+                </div>
+                <div class="setting-item">
+                    <label for="politeness">丁寧度（ 0 ～ 100 ）: <span id="politenessValue">80</span></label>
+                    <input type="range" id="politeness" min="0" max="100" value="70">
+                </div>
+                <div class="setting-item-row">
+                    <div class="setting-item half-width">
+                        <label for="charCount">概算文字数:</label>
+                        <input type="text" id="charCount" placeholder="例: 200-250" value="200-250">
+                    </div>
+                    <div class="setting-item half-width">
+                        <label>句読点:</label>
+                        <div class="radio-container">
+                            <span class="radio-item"><input type="radio" id="punc_yes" name="punctuation" value="あり" checked><label for="punc_yes">あり</label></span>
+                            <span class="radio-item"><input type="radio" id="punc_no" name="punctuation" value="なし"><label for="punc_no">なし</label></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="replyContent">返信に含めるべき内容:</label>
+                    <textarea id="replyContent" rows="3" placeholder="例: 次回の打ち合わせ日程の提案、感謝の言葉など"></textarea>
+                </div>
+                <div class="setting-item">
+                    <label>参照URL:</label>
+                    <div id="urlContainer"></div>
+                    <button type="button" id="addUrlBtn">URLを追加</button>
+                </div>
+            </section>
+
+            <div class="action-area">
+                <button id="generatePrompt">プロンプトを生成</button>
+            </div>
+
+            <section class="output-section">
+                <div class="output-header">
+                    <h2>生成されたプロンプト</h2>
+                    <button id="copyPromptBtn">クリップボードにコピー</button>
+                </div>
+                <pre id="generatedPrompt">ここにプロンプトが表示されます...</pre>
+            </section>
+
+            <section class="history-section">
+                <h2>生成履歴</h2>
+                <div id="historyContainer">
+                    <p>まだ履歴はありません。</p>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2024 Reply Generator</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
