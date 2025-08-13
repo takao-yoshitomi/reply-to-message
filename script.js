@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- イベントリスナーの設定 ---
     sentimentSlider.addEventListener('input', () => { sentimentValueSpan.textContent = sentimentSlider.value; });
-    politenessSlider.addEventListener('input', () => { politenessValueSpan.textContent = politenessValueSpan.value; });
+    politenessSlider.addEventListener('input', () => { politenessValueSpan.textContent = politenessSlider.value; });
     otherRelationshipText.addEventListener('focus', () => { otherRelationshipRadio.checked = true; });
 
     generatePromptBtn.addEventListener('click', () => {
