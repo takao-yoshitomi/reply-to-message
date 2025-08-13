@@ -47,8 +47,21 @@ def generate():
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(model_name)
+        
+        # AIの応答から引用情報を取得する
         response = model.generate_content(prompt)
-        return jsonify({'reply': response.text})
+        
+        citations = []
+        # responseオブジェクトにcitation_metadata属性が存在し、かつ中身があるかを確認
+        if hasattr(response, 'citation_metadata') and response.citation_metadata:
+            if hasattr(response.citation_metadata, 'citation_sources'):
+                 for source in response.citation_metadata.citation_sources:
+                    if hasattr(source, 'uri') and source.uri:
+                        citations.append(source.uri)
+
+        # 応答にcitationsリストを追加して返す
+        return jsonify({'reply': response.text, 'citations': citations})
+
     except google_exceptions.ResourceExhausted as e:
         print(f"Quota exceeded: {e}")
         return jsonify({'error': 'Quota exceeded for this model.', 'errorCode': 'QUOTA_EXCEEDED'}), 429

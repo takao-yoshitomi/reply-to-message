@@ -551,3 +551,10 @@ button#addUrlBtnQuestion:hover {
     font-size: 0.9em;
     word-break: break-all;
 }
+.toggle-history-urls-btn.ai-citation {
+    background-color: #17a2b8; /* A different color (info blue) */
+}
+
+.toggle-history-urls-btn.ai-citation:hover {
+    background-color: #138496;
+}

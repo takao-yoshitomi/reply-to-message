@@ -3,8 +3,8 @@
 const apiKeyInput = document.getElementById('apiKey');
 const updateModelsBtn = document.getElementById('updateModelsBtn');
 const modelSelector = document.getElementById('modelSelector');
-const toggleApiKeyVisibilityBtn = document.getElementById('toggleApiKeyVisibilityBtn'); // ★追加
-const apiKeySettingsArea = document.getElementById('apiKeySettingsArea'); // ★追加
+const toggleApiKeyVisibilityBtn = document.getElementById('toggleApiKeyVisibilityBtn');
+const apiKeySettingsArea = document.getElementById('apiKeySettingsArea');
 
 // Mode Tabs
 const replyModeTab = document.getElementById('replyModeTab');
@@ -47,7 +47,7 @@ const copyReplyBtn = document.getElementById('copyReplyBtn');
 
 // History
 const historyContainer = document.getElementById('historyContainer');
-const MAX_HISTORY_COUNT = 10;
+const MAX_HISTORY_COUNT = 5;
 
 // --- グローバル変数 ---
 let currentMode = 'reply';
@@ -57,11 +57,18 @@ let currentMode = 'reply';
 const updateModelList = async () => {
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey) {
-        alert('モデル一覧を取得するには、まずAPIキーを入力してください。');
+        alert('モデル一覧を更新するには、まず「APIキーを編集」からAPIキーを入力してください。');
         return;
     }
     modelSelector.innerHTML = '<option>モデルを読み込み中...</option>';
     modelSelector.disabled = true;
+
+    const modelRecommendations = {
+        'gemini-1.5-pro-latest': 5, 'gemini-1.5-pro': 5,
+        'gemini-1.5-flash-latest': 4, 'gemini-1.5-flash': 4, 'gemini-1.0-pro': 4,
+        'gemma-7b': 2, 'gemma-2b': 2,
+        'embedding-001': 1, 'aqa': 1,
+    };
 
     try {
         const response = await fetch('/models', {
@@ -72,11 +79,23 @@ const updateModelList = async () => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to fetch models');
 
+        const ratedModels = data.models.map(modelFullName => {
+            const modelName = modelFullName.replace('models/', '');
+            const rating = modelRecommendations[modelName] || 1;
+            return {
+                name: modelFullName,
+                rating: rating,
+                displayText: `${ '★'.repeat(rating) }${ '☆'.repeat(5 - rating) } ${modelName}`
+            };
+        });
+
+        ratedModels.sort((a, b) => b.rating - a.rating);
+
         modelSelector.innerHTML = '';
-        data.models.forEach(modelName => {
+        ratedModels.forEach(model => {
             const option = document.createElement('option');
-            option.value = modelName;
-            option.textContent = modelName;
+            option.value = model.name;
+            option.textContent = model.displayText;
             modelSelector.appendChild(option);
         });
 
@@ -130,8 +149,6 @@ function copyToClipboard(text, button, originalText) {
     }
 }
 
-// --- 設定値の取得とプロンプト生成 ---
-
 function getReplyModeSettings() {
     let relationship = document.querySelector('input[name="relationship"]:checked').value;
     if (relationship === 'other') relationship = otherRelationshipText.value || 'その他';
@@ -174,16 +191,8 @@ function createReplyPrompt(settings) {
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
-- **役割**: ${settings.userRole || '指定なし'}
-- **相手との関係性**: ${settings.relationship || '指定なし'}
-- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}
-- **丁寧度**: ${settings.politeness}
-- **返信の概算文字数**: ${settings.charCount || '指定なし'}
-- **句読点**: ${settings.punctuation}
-- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}
-- **参照情報**:
-${urlsText}
-
+- **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n- **参照情報**:
+${urlsText}\n
 以上の情報を用いて、自然で適切な返信文を作成してください。`;
 }
 
@@ -196,34 +205,24 @@ function createQuestionPrompt(settings) {
 ${settings.question || '（質問が入力されていません）'}\n--------------------
 
 設定:
-- **専門分野**: ${settings.expertise || '一般的な知識'}
-- **望ましい回答形式**: ${settings.outputFormat || '指定なし'}
-- **緊急度**: ${settings.urgency || '指定なし'}
-- **前提情報・文脈**: ${settings.assumptions || '指定なし'}
-- **参照情報**:
-${urlsText}
-
+- **専門分野**: ${settings.expertise || '一般的な知識'}\n- **望ましい回答形式**: ${settings.outputFormat || '指定なし'}\n- **緊急度**: ${settings.urgency || '指定なし'}\n- **前提情報・文脈**: ${settings.assumptions || '指定なし'}\n- **参照情報**:
+${urlsText}\n
 以上の情報を用いて、質の高い回答を作成してください。`;
 }
 
 
 // --- イベントリスナー設定 ---
 
-// ★更新: APIキー関連のイベントリスナー
 toggleApiKeyVisibilityBtn.addEventListener('click', () => {
     const isHidden = apiKeySettingsArea.classList.contains('hidden');
     if (isHidden) {
         if (confirm('APIキーを表示・編集しますか？\n第三者に見られないよう注意してください。')) {
             apiKeySettingsArea.classList.remove('hidden');
             toggleApiKeyVisibilityBtn.textContent = '閉じる';
-            // 表示時にモデル一覧を更新
-            if (apiKeyInput.value) {
-                updateModelList();
-            }
         }
     } else {
         apiKeySettingsArea.classList.add('hidden');
-        toggleApiKeyVisibilityBtn.textContent = '表示・編集';
+        toggleApiKeyVisibilityBtn.textContent = 'APIキーを編集';
     }
 });
 
@@ -232,49 +231,30 @@ apiKeyInput.addEventListener('change', () => {
     if (confirm('APIキーを更新して保存しますか？')) {
         localStorage.setItem('geminiApiKey', newApiKey);
         alert('APIキーを保存しました。');
-        // 保存後にモデル一覧を更新
-        if (newApiKey) {
-            updateModelList();
-        }
+        if (newApiKey) updateModelList();
     } else {
-        // キャンセルされたら元の値に戻す
         apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
     }
 });
 
-// モデル選択の保存
 modelSelector.addEventListener('change', () => localStorage.setItem('selectedModel', modelSelector.value));
-
-// モデル一覧更新ボタン
 updateModelsBtn.addEventListener('click', updateModelList);
-
-// タブ切替
 replyModeTab.addEventListener('click', () => switchMode('reply'));
 questionModeTab.addEventListener('click', () => switchMode('question'));
-
-// プロンプト表示切替
 togglePromptBtn.addEventListener('click', togglePromptVisibility);
-
-// URLフィールド管理
 addUrlBtn.addEventListener('click', () => addUrlField(urlContainer));
-urlContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove();
-});
+urlContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove(); });
 addUrlBtnQuestion.addEventListener('click', () => addUrlField(urlContainerQuestion));
-urlContainerQuestion.addEventListener('click', (e) => {
-    if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove();
-});
-
-// 返信モードのUI要素
+urlContainerQuestion.addEventListener('click', (e) => { if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove(); });
 sentimentSlider.addEventListener('input', () => { sentimentValueSpan.textContent = sentimentSlider.value; });
 politenessSlider.addEventListener('input', () => { politenessValueSpan.textContent = politenessSlider.value; });
 otherRelationshipText.addEventListener('focus', () => { otherRelationshipRadio.checked = true; });
 
-// メインのAI生成ボタン
+// ★更新: メインのAI生成ボタン (Citations対応)
 generateBtn.addEventListener('click', async () => {
     const apiKey = apiKeyInput.value.trim();
-    if (!apiKey || !modelSelector.value) {
-        alert('APIキーが設定されていません。「表示・編集」ボタンからAPIキーを設定してください。');
+    if (!apiKey || !modelSelector.value || modelSelector.value === 'モデルを読み込み中...' || modelSelector.value === '読み込み失敗') {
+        alert('APIキーと使用モデルを正しく設定してください。');
         return;
     }
 
@@ -296,11 +276,7 @@ generateBtn.addEventListener('click', async () => {
         const response = await fetch('/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                prompt: prompt,
-                apiKey: apiKey,
-                modelName: settings.selectedModel
-            }),
+            body: JSON.stringify({ prompt, apiKey, modelName: settings.selectedModel }),
         });
 
         const data = await response.json();
@@ -314,8 +290,9 @@ generateBtn.addEventListener('click', async () => {
             }
         } else {
             const aiReply = data.reply;
+            const aiCitations = data.citations || []; // ★AI参照URLを受け取る
             aiReplyBox.textContent = aiReply;
-            saveToHistory(settings, prompt, aiReply);
+            saveToHistory(settings, prompt, aiReply, aiCitations); // ★履歴に渡す
         }
 
     } catch (error) {
@@ -338,13 +315,15 @@ copyReplyBtn.addEventListener('click', () => copyToClipboard(aiReplyBox.textCont
 
 // --- 履歴関連の関数 ---
 
-function saveToHistory(settings, prompt, aiReply) {
+// ★更新: saveToHistory (aiCitations引数を追加)
+function saveToHistory(settings, prompt, aiReply, aiCitations) {
     let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
-    history.unshift({ settings, prompt, aiReply, timestamp: new Date().toISOString() });
+    history.unshift({ settings, prompt, aiReply, aiCitations, timestamp: new Date().toISOString() });
     history = history.slice(0, MAX_HISTORY_COUNT);
     localStorage.setItem('promptHistory', JSON.stringify(history));
 }
 
+// ★更新: renderHistory (AI参照URLの表示機能を追加)
 function renderHistory() {
     historyContainer.innerHTML = '';
     const history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
@@ -364,7 +343,6 @@ function renderHistory() {
 
         const promptPreview = document.createElement('pre');
         promptPreview.innerHTML = `<strong>${modeLabel}</strong> ${previewText}...<br><small>Model: ${item.settings.selectedModel || 'N/A'}</small>`;
-
         mainContent.appendChild(promptPreview);
 
         const controlsContainer = document.createElement('div');
@@ -388,20 +366,16 @@ function renderHistory() {
         controlsContainer.appendChild(restoreButton);
         controlsContainer.appendChild(deleteButton);
 
-        // ★ここからがURL表示機能の追加部分
-        const urls = item.settings.referenceUrls;
-        if (urls && urls.length > 0 && urls.some(u => u)) { // URLが空文字列でないことを確認
+        const userUrls = item.settings.referenceUrls;
+        if (userUrls && userUrls.length > 0 && userUrls.some(u => u)) {
             const urlContainer = document.createElement('div');
-            urlContainer.className = 'history-urls-container hidden'; // 最初は非表示
+            urlContainer.className = 'history-urls-container hidden';
             const urlList = document.createElement('ul');
-            urls.forEach(url => {
-                if (!url) return; // 空のURLは無視
+            userUrls.forEach(url => {
+                if (!url) return;
                 const li = document.createElement('li');
                 const a = document.createElement('a');
-                a.href = url;
-                a.textContent = url;
-                a.target = '_blank'; // 新しいタブで開く
-                a.rel = 'noopener noreferrer';
+                a.href = url; a.textContent = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
                 li.appendChild(a);
                 urlList.appendChild(li);
             });
@@ -409,12 +383,36 @@ function renderHistory() {
 
             const toggleUrlsBtn = document.createElement('button');
             toggleUrlsBtn.className = 'toggle-history-urls-btn';
-            toggleUrlsBtn.textContent = `参照URLを表示 (${urls.filter(u=>u).length}件)`;
+            toggleUrlsBtn.textContent = `あなたが参照したURL (${userUrls.filter(u=>u).length}件)`;
             toggleUrlsBtn.addEventListener('click', () => {
                 const isHidden = urlContainer.classList.toggle('hidden');
-                toggleUrlsBtn.textContent = isHidden ? `参照URLを表示 (${urls.filter(u=>u).length}件)` : 'URLを非表示';
+                toggleUrlsBtn.textContent = isHidden ? `あなたが参照したURL (${userUrls.filter(u=>u).length}件)` : 'URLを非表示';
             });
-            controlsContainer.appendChild(toggleUrlsBtn); // コントロールボタンの一つとして追加
+            controlsContainer.appendChild(toggleUrlsBtn);
+        }
+
+        const aiUrls = item.aiCitations;
+        if (aiUrls && aiUrls.length > 0) {
+            const urlContainer = document.createElement('div');
+            urlContainer.className = 'history-urls-container hidden';
+            const urlList = document.createElement('ul');
+            aiUrls.forEach(url => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = url; a.textContent = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                li.appendChild(a);
+                urlList.appendChild(li);
+            });
+            mainContent.appendChild(urlContainer);
+
+            const toggleUrlsBtn = document.createElement('button');
+            toggleUrlsBtn.className = 'toggle-history-urls-btn ai-citation';
+            toggleUrlsBtn.textContent = `AIが参照したURL (${aiUrls.length}件)`;
+            toggleUrlsBtn.addEventListener('click', () => {
+                const isHidden = urlContainer.classList.toggle('hidden');
+                toggleUrlsBtn.textContent = isHidden ? `AIが参照したURL (${aiUrls.length}件)` : 'URLを非表示';
+            });
+            controlsContainer.appendChild(toggleUrlsBtn);
         }
         
         historyItem.appendChild(mainContent);
@@ -476,20 +474,9 @@ async function restoreFromHistory(index) {
 
     generatedPrompt.textContent = item.prompt;
     aiReplyBox.textContent = item.aiReply || '';
-    
     promptDisplayArea.classList.remove('hidden');
     togglePromptBtn.textContent = 'プロンプトを非表示';
 
-    // ★更新: APIキー設定エリアを表示してモデルリストを更新
-    if (!apiKeySettingsArea.classList.contains('hidden')) {
-        await updateModelList();
-    } else {
-        if (confirm('APIキー設定を表示してモデルリストを更新しますか？')) {
-            apiKeySettingsArea.classList.remove('hidden');
-            toggleApiKeyVisibilityBtn.textContent = '閉じる';
-            await updateModelList();
-        } 
-    }
     if(settings.selectedModel) modelSelector.value = settings.selectedModel;
 
     window.scrollTo(0, 0);
@@ -499,16 +486,12 @@ async function restoreFromHistory(index) {
 // --- 初期化処理 ---
 (async () => {
     apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
-    
     addUrlField(urlContainer);
     addUrlField(urlContainerQuestion);
-
     renderHistory();
-    
-    // ★削除: ページ読み込み時の自動モデル更新は削除
-    // if (apiKeyInput.value) {
-    //     await updateModelList();
-    // }
-    
+    // ★APIキーがあればモデルリストを自動更新
+    if (apiKeyInput.value) {
+        await updateModelList();
+    }
     switchMode('reply');
 })();
