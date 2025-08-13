@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>返信文作成アシスタント</title>
+    <title>AI返信文作成アシスタント</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>返信文作成アシスタント</h1>
+            <h1>AI返信文作成アシスタント</h1>
         </header>
         <main>
+            <section class="api-key-section">
+                <h2>API設定</h2>
+                <div class="setting-item">
+                    <label for="apiKey">Gemini APIキー:</label>
+                    <input type="password" id="apiKey" placeholder="ここにAPIキーを貼り付け">
+                </div>
+            </section>
+
             <section class="input-section">
                 <h2>受け取ったメッセージ</h2>
                 <textarea id="receivedMessage" placeholder="ここに相手からのメッセージを貼り付けてください..."></textarea>
@@ -21,7 +29,7 @@
                 <h2>返答設定</h2>
                 <div class="setting-item">
                     <label for="userRole">あなたの役割:</label>
-                    <input type="text" id="userRole" placeholder="例: 税理士事務所職員・税理士など" value="税理士事務所職員">
+                    <input type="text" id="userRole" placeholder="例: ビジネスマン、友人、先生" value="税理士事務所職員">
                 </div>
                 <div class="setting-item">
                     <label>相手との関係性:</label>
@@ -37,17 +45,17 @@
                     </div>
                 </div>
                  <div class="setting-item">
-                    <label for="sentiment">感情の方向性 (否定的-100 / 肯定的100): <span id="sentimentValue">100</span></label>
+                    <label for="sentiment">感情の方向性 (否定的 / 肯定的): <span id="sentimentValue">100</span></label>
                     <input type="range" id="sentiment" min="-100" max="100" value="100">
                 </div>
                 <div class="setting-item">
-                    <label for="politeness">丁寧度（ 0 ～ 100 ）: <span id="politenessValue">80</span></label>
-                    <input type="range" id="politeness" min="0" max="100" value="70">
+                    <label for="politeness">丁寧度: <span id="politenessValue">80</span></label>
+                    <input type="range" id="politeness" min="0" max="100" value="80">
                 </div>
                 <div class="setting-item-row">
                     <div class="setting-item half-width">
                         <label for="charCount">概算文字数:</label>
-                        <input type="text" id="charCount" placeholder="例: 200-250 　※未入力の場合は自由">
+                        <input type="text" id="charCount" placeholder="例: 200-250">
                     </div>
                     <div class="setting-item half-width">
                         <label>句読点:</label>
@@ -69,7 +77,8 @@
             </section>
 
             <div class="action-area">
-                <button id="generatePrompt">プロンプトを生成</button>
+                <button id="generateReplyBtn">AIで返信を生成</button>
+                <div id="loader" class="loader" style="display: none;"></div>
             </div>
 
             <section class="output-section">
@@ -78,6 +87,14 @@
                     <button id="copyPromptBtn">クリップボードにコピー</button>
                 </div>
                 <pre id="generatedPrompt">ここにプロンプトが表示されます...</pre>
+            </section>
+
+            <section class="output-section ai-reply-section">
+                <div class="output-header">
+                    <h2>AIからの返信</h2>
+                    <button id="copyReplyBtn">返信をコピー</button>
+                </div>
+                <div id="aiReply" class="ai-reply-box">ここにAIからの返信が表示されます...</div>
             </section>
 
             <section class="history-section">
@@ -91,6 +108,6 @@
             <p>&copy; 2024 Reply Generator</p>
         </footer>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
