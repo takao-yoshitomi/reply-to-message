@@ -13,17 +13,22 @@
         </header>
         <main>
             <section class="api-key-section">
-                <h2>API設定</h2>
-                <div class="setting-item">
-                    <label for="apiKey">Gemini APIキー:</label>
-                    <div class="api-key-container">
-                        <input type="password" id="apiKey" placeholder="ここにAPIキーを貼り付け">
-                        <button type="button" id="updateModelsBtn">モデル一覧を更新</button>
-                    </div>
+                <div class="api-section-header">
+                    <h2>API設定</h2>
+                    <button id="toggleApiKeyVisibilityBtn">表示・編集</button>
                 </div>
-                <div class="setting-item">
-                    <label for="modelSelector">使用モデル:</label>
-                    <select id="modelSelector"></select>
+                <div id="apiKeySettingsArea" class="hidden">
+                    <div class="setting-item">
+                        <label for="apiKey">Gemini APIキー:</label>
+                        <input type="password" id="apiKey" placeholder="ここにAPIキーを貼り付け">
+                    </div>
+                    <div class="setting-item">
+                        <label for="modelSelector">使用モデル:</label>
+                        <div class="model-selector-container">
+                            <select id="modelSelector"></select>
+                            <button type="button" id="updateModelsBtn">更新</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 

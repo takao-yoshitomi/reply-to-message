@@ -3,6 +3,8 @@
 const apiKeyInput = document.getElementById('apiKey');
 const updateModelsBtn = document.getElementById('updateModelsBtn');
 const modelSelector = document.getElementById('modelSelector');
+const toggleApiKeyVisibilityBtn = document.getElementById('toggleApiKeyVisibilityBtn'); // ★追加
+const apiKeySettingsArea = document.getElementById('apiKeySettingsArea'); // ★追加
 
 // Mode Tabs
 const replyModeTab = document.getElementById('replyModeTab');
@@ -45,14 +47,13 @@ const copyReplyBtn = document.getElementById('copyReplyBtn');
 
 // History
 const historyContainer = document.getElementById('historyContainer');
-const MAX_HISTORY_COUNT = 10; // 少し増やしました
+const MAX_HISTORY_COUNT = 10;
 
 // --- グローバル変数 ---
-let currentMode = 'reply'; // 現在のモードを追跡
+let currentMode = 'reply';
 
 // --- 関数定義 ---
 
-// モデル一覧をサーバーに問い合わせて更新
 const updateModelList = async () => {
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey) {
@@ -91,7 +92,6 @@ const updateModelList = async () => {
     }
 };
 
-// ★新機能: モード切替
 function switchMode(mode) {
     currentMode = mode;
     if (mode === 'reply') {
@@ -109,13 +109,11 @@ function switchMode(mode) {
     }
 }
 
-// ★新機能: プロンプト表示切替
 function togglePromptVisibility() {
     const isHidden = promptDisplayArea.classList.toggle('hidden');
     togglePromptBtn.textContent = isHidden ? 'プロンプトを表示' : 'プロンプトを非表示';
 }
 
-// ★更新: URLフィールド追加 (コンテナを引数に取る)
 function addUrlField(container, url = '') {
     const div = document.createElement('div');
     div.className = 'url-item';
@@ -123,7 +121,6 @@ function addUrlField(container, url = '') {
     container.appendChild(div);
 }
 
-// クリップボードにコピー
 function copyToClipboard(text, button, originalText) {
     if (navigator.clipboard && text && !text.includes('ここに...')) {
         navigator.clipboard.writeText(text).then(() => {
@@ -135,7 +132,6 @@ function copyToClipboard(text, button, originalText) {
 
 // --- 設定値の取得とプロンプト生成 ---
 
-// ★更新: 返信モードの設定を取得
 function getReplyModeSettings() {
     let relationship = document.querySelector('input[name="relationship"]:checked').value;
     if (relationship === 'other') relationship = otherRelationshipText.value || 'その他';
@@ -156,7 +152,6 @@ function getReplyModeSettings() {
     };
 }
 
-// ★新機能: 質問モードの設定を取得
 function getQuestionModeSettings() {
     const urlInputs = Array.from(urlContainerQuestion.querySelectorAll('.url-input')).map(input => input.value.trim()).filter(url => url);
     return {
@@ -171,7 +166,6 @@ function getQuestionModeSettings() {
     };
 }
 
-// ★更新: 返信モードのプロンプトを生成
 function createReplyPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     return `あなたは優秀なコピーライターです。
@@ -193,7 +187,6 @@ ${urlsText}
 以上の情報を用いて、自然で適切な返信文を作成してください。`;
 }
 
-// ★新機能: 質問モードのプロンプトを生成
 function createQuestionPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     return `あなたは指定された専門分野の専門家です。
@@ -216,46 +209,76 @@ ${urlsText}
 
 // --- イベントリスナー設定 ---
 
-// APIキー/モデル選択の保存
-apiKeyInput.addEventListener('change', () => localStorage.setItem('geminiApiKey', apiKeyInput.value));
+// ★更新: APIキー関連のイベントリスナー
+toggleApiKeyVisibilityBtn.addEventListener('click', () => {
+    const isHidden = apiKeySettingsArea.classList.contains('hidden');
+    if (isHidden) {
+        if (confirm('APIキーを表示・編集しますか？\n第三者に見られないよう注意してください。')) {
+            apiKeySettingsArea.classList.remove('hidden');
+            toggleApiKeyVisibilityBtn.textContent = '閉じる';
+            // 表示時にモデル一覧を更新
+            if (apiKeyInput.value) {
+                updateModelList();
+            }
+        }
+    } else {
+        apiKeySettingsArea.classList.add('hidden');
+        toggleApiKeyVisibilityBtn.textContent = '表示・編集';
+    }
+});
+
+apiKeyInput.addEventListener('change', () => {
+    const newApiKey = apiKeyInput.value.trim();
+    if (confirm('APIキーを更新して保存しますか？')) {
+        localStorage.setItem('geminiApiKey', newApiKey);
+        alert('APIキーを保存しました。');
+        // 保存後にモデル一覧を更新
+        if (newApiKey) {
+            updateModelList();
+        }
+    } else {
+        // キャンセルされたら元の値に戻す
+        apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+    }
+});
+
+// モデル選択の保存
 modelSelector.addEventListener('change', () => localStorage.setItem('selectedModel', modelSelector.value));
+
+// モデル一覧更新ボタン
 updateModelsBtn.addEventListener('click', updateModelList);
 
-// ★新機能: タブ切替
+// タブ切替
 replyModeTab.addEventListener('click', () => switchMode('reply'));
 questionModeTab.addEventListener('click', () => switchMode('question'));
 
-// ★新機能: プロンプト表示切替
+// プロンプト表示切替
 togglePromptBtn.addEventListener('click', togglePromptVisibility);
 
-// URLフィールド管理 (返信モード)
+// URLフィールド管理
 addUrlBtn.addEventListener('click', () => addUrlField(urlContainer));
 urlContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove();
 });
-
-// ★新機能: URLフィールド管理 (質問モード)
 addUrlBtnQuestion.addEventListener('click', () => addUrlField(urlContainerQuestion));
 urlContainerQuestion.addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-url-btn')) e.target.parentElement.remove();
 });
 
-
-// 返信モードのUI要素のイベントリスナー
+// 返信モードのUI要素
 sentimentSlider.addEventListener('input', () => { sentimentValueSpan.textContent = sentimentSlider.value; });
 politenessSlider.addEventListener('input', () => { politenessValueSpan.textContent = politenessSlider.value; });
 otherRelationshipText.addEventListener('focus', () => { otherRelationshipRadio.checked = true; });
 
-// ★★★ メインのAI生成ボタン (ロジック更新) ★★★
+// メインのAI生成ボタン
 generateBtn.addEventListener('click', async () => {
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey || !modelSelector.value) {
-        alert('APIキーを入力し、使用モデルを選択してください。');
+        alert('APIキーが設定されていません。「表示・編集」ボタンからAPIキーを設定してください。');
         return;
     }
 
     let settings, prompt;
-    // 現在のモードに応じて設定とプロンプトを取得
     if (currentMode === 'reply') {
         settings = getReplyModeSettings();
         prompt = createReplyPrompt(settings);
@@ -292,7 +315,7 @@ generateBtn.addEventListener('click', async () => {
         } else {
             const aiReply = data.reply;
             aiReplyBox.textContent = aiReply;
-            saveToHistory(settings, prompt, aiReply); // settingsにはmodeが含まれている
+            saveToHistory(settings, prompt, aiReply);
         }
 
     } catch (error) {
@@ -313,9 +336,8 @@ copyPromptBtn.addEventListener('click', () => copyToClipboard(generatedPrompt.te
 copyReplyBtn.addEventListener('click', () => copyToClipboard(aiReplyBox.textContent, copyReplyBtn, '返信をコピー'));
 
 
-// --- 履歴関連の関数 (更新) ---
+// --- 履歴関連の関数 ---
 
-// ★更新: 履歴保存 (settingsにmodeが含まれる)
 function saveToHistory(settings, prompt, aiReply) {
     let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
     history.unshift({ settings, prompt, aiReply, timestamp: new Date().toISOString() });
@@ -323,7 +345,6 @@ function saveToHistory(settings, prompt, aiReply) {
     localStorage.setItem('promptHistory', JSON.stringify(history));
 }
 
-// ★更新: 履歴表示 (モードを表示)
 function renderHistory() {
     historyContainer.innerHTML = '';
     const history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
@@ -335,11 +356,16 @@ function renderHistory() {
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
 
+        const mainContent = document.createElement('div');
+        mainContent.className = 'history-main-content';
+
         const modeLabel = item.settings.mode === 'question' ? '[質問]' : '[返答]';
         const previewText = (item.aiReply || '（応答なし）').substring(0, 100);
 
         const promptPreview = document.createElement('pre');
         promptPreview.innerHTML = `<strong>${modeLabel}</strong> ${previewText}...<br><small>Model: ${item.settings.selectedModel || 'N/A'}</small>`;
+
+        mainContent.appendChild(promptPreview);
 
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'history-controls';
@@ -361,7 +387,37 @@ function renderHistory() {
         controlsContainer.appendChild(timestamp);
         controlsContainer.appendChild(restoreButton);
         controlsContainer.appendChild(deleteButton);
-        historyItem.appendChild(promptPreview);
+
+        // ★ここからがURL表示機能の追加部分
+        const urls = item.settings.referenceUrls;
+        if (urls && urls.length > 0 && urls.some(u => u)) { // URLが空文字列でないことを確認
+            const urlContainer = document.createElement('div');
+            urlContainer.className = 'history-urls-container hidden'; // 最初は非表示
+            const urlList = document.createElement('ul');
+            urls.forEach(url => {
+                if (!url) return; // 空のURLは無視
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = url;
+                a.textContent = url;
+                a.target = '_blank'; // 新しいタブで開く
+                a.rel = 'noopener noreferrer';
+                li.appendChild(a);
+                urlList.appendChild(li);
+            });
+            mainContent.appendChild(urlContainer);
+
+            const toggleUrlsBtn = document.createElement('button');
+            toggleUrlsBtn.className = 'toggle-history-urls-btn';
+            toggleUrlsBtn.textContent = `参照URLを表示 (${urls.filter(u=>u).length}件)`;
+            toggleUrlsBtn.addEventListener('click', () => {
+                const isHidden = urlContainer.classList.toggle('hidden');
+                toggleUrlsBtn.textContent = isHidden ? `参照URLを表示 (${urls.filter(u=>u).length}件)` : 'URLを非表示';
+            });
+            controlsContainer.appendChild(toggleUrlsBtn); // コントロールボタンの一つとして追加
+        }
+        
+        historyItem.appendChild(mainContent);
         historyItem.appendChild(controlsContainer);
         historyContainer.appendChild(historyItem);
     });
@@ -375,16 +431,14 @@ function deleteFromHistory(index) {
     renderHistory();
 }
 
-// ★更新: 履歴からの復元 (モードに応じて処理を分岐)
 async function restoreFromHistory(index) {
     const history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
     const item = history[index];
     if (!item) return;
 
     const settings = item.settings;
-    const mode = settings.mode || 'reply'; // 古い履歴データのためにデフォルト値を設定
+    const mode = settings.mode || 'reply';
 
-    // 正しいモードに切り替え
     switchMode(mode);
 
     if (mode === 'reply') {
@@ -423,12 +477,19 @@ async function restoreFromHistory(index) {
     generatedPrompt.textContent = item.prompt;
     aiReplyBox.textContent = item.aiReply || '';
     
-    // プロンプトエリアを表示状態にする
     promptDisplayArea.classList.remove('hidden');
     togglePromptBtn.textContent = 'プロンプトを非表示';
 
-    // モデルリストを更新し、保存されたモデルを選択
-    await updateModelList();
+    // ★更新: APIキー設定エリアを表示してモデルリストを更新
+    if (!apiKeySettingsArea.classList.contains('hidden')) {
+        await updateModelList();
+    } else {
+        if (confirm('APIキー設定を表示してモデルリストを更新しますか？')) {
+            apiKeySettingsArea.classList.remove('hidden');
+            toggleApiKeyVisibilityBtn.textContent = '閉じる';
+            await updateModelList();
+        } 
+    }
     if(settings.selectedModel) modelSelector.value = settings.selectedModel;
 
     window.scrollTo(0, 0);
@@ -439,16 +500,15 @@ async function restoreFromHistory(index) {
 (async () => {
     apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
     
-    // ★更新: 両方のURLコンテナに初期フィールドを追加
     addUrlField(urlContainer);
     addUrlField(urlContainerQuestion);
 
     renderHistory();
     
-    if (apiKeyInput.value) {
-        await updateModelList();
-    }
+    // ★削除: ページ読み込み時の自動モデル更新は削除
+    // if (apiKeyInput.value) {
+    //     await updateModelList();
+    // }
     
-    // 初期モードを設定
     switchMode('reply');
 })();
