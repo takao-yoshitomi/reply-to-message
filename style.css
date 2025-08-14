@@ -26,10 +26,19 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+header {
+    background: linear-gradient(to bottom, var(--primary-color), #6fa8dc); /* 水色から少し濃い水色へ */
+    padding: 30px 0; /* 上下のパディング */
+    border-radius: 10px 10px 0 0; /* 上部だけ角丸 */
+    margin: -20px -40px 20px -40px; /* container のパディングを打ち消し、下部にマージン */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 影を追加 */
+}
+
 header h1 {
-    color: var(--primary-color);
+    color: white; /* 文字色を白に */
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 0; /* グラデーションの範囲に収めるためマージンを0に */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字に影を追加 */
 }
 
 section {
@@ -557,4 +566,67 @@ button#addUrlBtnQuestion:hover {
 
 .toggle-history-urls-btn.ai-citation:hover {
     background-color: #138496;
+}
+
+/* --- Model Description --- */
+.model-description {
+    font-size: 0.8em; /* 文字を小さく */
+    color: #6c757d;   /* 色を変える (グレー系) */
+    margin-left: 5px; /* 少しスペースを空ける */
+}
+
+/* --- Model Description List --- */
+.model-description-list {
+    position: absolute;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: calc(100% - 2px); /* セレクトボックスと同じ幅 */
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+.model-list-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+}
+
+.model-list-item:last-child {
+    border-bottom: none;
+}
+
+.model-list-item:hover {
+    background-color: var(--secondary-color);
+}
+
+.model-list-name {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.model-list-description {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+button {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 立体感 */
+    transition: all 0.2s ease-in-out; /* ホバー時のアニメーション */
+}
+
+button:hover {
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 影を濃く */
+}
+
+button:active {
+    transform: translateY(1px); /* クリック時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* 影を薄く */
 }
