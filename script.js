@@ -83,18 +83,18 @@ const updateModelList = async () => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to fetch models');
 
-        const ratedModels = data.models.map(modelFullName => {
+        let ratedModels = data.models.map(modelFullName => {
             const modelName = modelFullName.replace('models/', '');
-            const rating = modelRecommendations[modelName] || 1;
+            // rating は後で設定するので、ここでは仮の値
             return {
                 name: modelFullName,
-                rating: rating,
-                displayText: `${ '★'.repeat(rating) }${ '☆'.repeat(5 - rating) } ${modelName}`
+                rating: 0, // 仮の値
+                displayText: modelName // 仮の値
             };
         });
 
+        // 既存の複雑なソートロジックを適用
         ratedModels.sort((a, b) => {
-            // モデル名のパース関数
             const parseModelName = (fullName) => {
                 const name = fullName.replace('models/', '');
                 const parts = name.split('-');
@@ -136,11 +136,44 @@ const updateModelList = async () => {
             // 4. 安定性 (latest > stable > preview)
             if (aInfo.stability !== bInfo.stability) return bInfo.stability - aInfo.stability;
 
-            // 5. 既存のレーティング (降順)
-            if (a.rating !== b.rating) return b.rating - a.rating;
-
             // 最終的に名前でソート (昇順)
             return aInfo.name.localeCompare(bInfo.name);
+        });
+
+        // ソート後のインデックスに基づいて星の数を割り当て
+        ratedModels = ratedModels.map((model, index) => {
+            let starCount;
+
+            // 基本の星の割り当て (上から5個が5つ星、次の5個が4つ星...)
+            if (index < 5) {
+                starCount = 5;
+            } else if (index < 10) {
+                starCount = 4;
+            } else if (index < 15) {
+                starCount = 3;
+            } else if (index < 20) {
+                starCount = 2;
+            } else {
+                starCount = 1;
+            }
+
+            // pro は +1、preview は -1
+            const modelName = model.name.replace('models/', '');
+            if (modelName.includes('pro')) {
+                starCount += 1;
+            }
+            if (modelName.includes('preview')) {
+                starCount -= 1;
+            }
+
+            // 最高は5、最低は1に制限
+            starCount = Math.max(1, Math.min(5, starCount));
+
+            return {
+                ...model,
+                rating: starCount,
+                displayText: `${ '★'.repeat(starCount) }${ '☆'.repeat(5 - starCount) } ${model.displayText}`
+            };
         });
 
         modelSelector.innerHTML = '';
