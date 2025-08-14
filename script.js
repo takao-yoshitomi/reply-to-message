@@ -26,10 +26,6 @@ const replyContent = document.getElementById('replyContent');
 const urlContainer = document.getElementById('urlContainer');
 const addUrlBtn = document.getElementById('addUrlBtn');
 
-// New: Cite URL Option
-const citeUrlYesRadio = document.getElementById('cite_url_yes');
-const citeUrlNoRadio = document.getElementById('cite_url_no');
-
 // Question Mode Settings
 const questionContent = document.getElementById('questionContent');
 const expertise = document.getElementById('expertise');
@@ -221,8 +217,7 @@ function getReplyModeSettings() {
         replyContent: replyContent.value,
         referenceUrls: urlInputs,
                 relationshipRadio: document.querySelector('input[name="relationship"]:checked').id,
-        selectedModel: modelSelector.value,
-        citeUrlOption: document.querySelector('input[name="citeUrl"]:checked').value
+        selectedModel: modelSelector.value
     };
 }
 
@@ -244,20 +239,17 @@ function createReplyPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
-\n\n文中に「*」は必ず利用しないでください。
+\n\n文中に*や**は絶対に使用しないでください。読みにくいです。
+\n文章作成に当たり参照したサイトのURLを文末に記載してください。ただし実際に情報が存在するサイトで、尚且つ最新の情報を提供してください。もしない場合は文末に記載不要です
 
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
-- **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n文章作成に当たり参照したサイトのURLを文末に記載してください。\n- **参照情報**:
-${urlsText}\n`;
+- **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n- **参照情報**:
+${urlsText}\n\n\n文中に*や**は絶対に使用しないでください。読みにくいです。`;
 
-    if (settings.citeUrlOption === 'はい') {
-            prompt += `\n\n\n\n **参照元の表示**:\n 文章作成に当たり参照したサイトのURLを文末に記載してください。`;
-        }
-    
         // 追加質問の指示
-    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで提案してください\n`;
+    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
 
     prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
 
