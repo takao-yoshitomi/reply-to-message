@@ -244,22 +244,24 @@ function createReplyPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
+\n\n文中に「*」は必ず利用しないでください。
 
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
-- **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n- **参照情報**:
-${urlsText}\n
-以上の情報を用いて、自然で適切な返信文を作成してください。`;
+- **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n文章作成に当たり参照したサイトのURLを文末に記載してください。\n- **参照情報**:
+${urlsText}\n`;
 
     if (settings.citeUrlOption === 'はい') {
-        prompt += `\n\nAIが参照した情報源のURLがある場合、返信文の末尾に「参照元: [URL]」の形式で記載してください。`;
-    }
+            prompt += `\n\n\n\n **参照元の表示**:\n 文章作成に当たり参照したサイトのURLを文末に記載してください。`;
+        }
+    
+        // 追加質問の指示
+    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで提案してください\n`;
 
-    // 追加質問の指示
-    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、もし追加で情報が必要だと感じた場合、またはユーザーが次に聞くべきだと考えられる質問があれば、箇条書きで3つまで提案してください。提案がない場合は「提案なし」と記載してください。
+    prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
 
-[REPLY_START]\n`;
+    prompt += `\n\n[REPLY_START]\n`;
     return prompt;
 }
 
