@@ -26,6 +26,10 @@ const replyContent = document.getElementById('replyContent');
 const urlContainer = document.getElementById('urlContainer');
 const addUrlBtn = document.getElementById('addUrlBtn');
 
+// New: Cite URL Option
+const citeUrlYesRadio = document.getElementById('cite_url_yes');
+const citeUrlNoRadio = document.getElementById('cite_url_no');
+
 // Question Mode Settings
 const questionContent = document.getElementById('questionContent');
 const expertise = document.getElementById('expertise');
@@ -44,6 +48,10 @@ const generatedPrompt = document.getElementById('generatedPrompt');
 const copyPromptBtn = document.getElementById('copyPromptBtn');
 const aiReplyBox = document.getElementById('aiReply');
 const copyReplyBtn = document.getElementById('copyReplyBtn');
+
+// New: Additional Questions
+const additionalQuestionsArea = document.getElementById('additionalQuestionsArea');
+const additionalQuestionsList = document.getElementById('additionalQuestionsList');
 
 // History
 const historyContainer = document.getElementById('historyContainer');
@@ -89,7 +97,55 @@ const updateModelList = async () => {
             };
         });
 
-        ratedModels.sort((a, b) => b.rating - a.rating);
+        ratedModels.sort((a, b) => {
+            // モデル名のパース関数
+            const parseModelName = (fullName) => {
+                const name = fullName.replace('models/', '');
+                const parts = name.split('-');
+                const isGemini = name.startsWith('gemini');
+                let version = 0;
+                let type = ''; // pro, flash, etc.
+                let stability = 0; // latest > stable > preview
+
+                if (isGemini) {
+                    if (parts[1]) {
+                        const versionMatch = parts[1].match(/(\d+\.\d+)/);
+                        if (versionMatch) version = parseFloat(versionMatch[1]);
+                    }
+                    if (parts[2]) {
+                        type = parts[2];
+                    }
+                    if (name.includes('latest')) stability = 3;
+                    else if (name.includes('preview')) stability = 1;
+                    else stability = 2; // stable
+                }
+
+                return { isGemini, version, type, stability, name };
+            };
+
+            const aInfo = parseModelName(a.name);
+            const bInfo = parseModelName(b.name);
+
+            // 1. Geminiファミリー優先
+            if (aInfo.isGemini && !bInfo.isGemini) return -1;
+            if (!aInfo.isGemini && bInfo.isGemini) return 1;
+
+            // 2. バージョン (降順)
+            if (aInfo.version !== bInfo.version) return bInfo.version - aInfo.version;
+
+            // 3. タイプ (pro > flash)
+            const typeOrder = { 'pro': 2, 'flash': 1, '': 0 }; // '' for gemini-1.0-pro
+            if (typeOrder[aInfo.type] !== typeOrder[bInfo.type]) return typeOrder[bInfo.type] - typeOrder[aInfo.type];
+
+            // 4. 安定性 (latest > stable > preview)
+            if (aInfo.stability !== bInfo.stability) return bInfo.stability - aInfo.stability;
+
+            // 5. 既存のレーティング (降順)
+            if (a.rating !== b.rating) return b.rating - a.rating;
+
+            // 最終的に名前でソート (昇順)
+            return aInfo.name.localeCompare(bInfo.name);
+        });
 
         modelSelector.innerHTML = '';
         ratedModels.forEach(model => {
@@ -164,8 +220,9 @@ function getReplyModeSettings() {
         punctuation: document.querySelector('input[name="punctuation"]:checked').value,
         replyContent: replyContent.value,
         referenceUrls: urlInputs,
-        relationshipRadio: document.querySelector('input[name="relationship"]:checked').id,
-        selectedModel: modelSelector.value
+                relationshipRadio: document.querySelector('input[name="relationship"]:checked').id,
+        selectedModel: modelSelector.value,
+        citeUrlOption: document.querySelector('input[name="citeUrl"]:checked').value
     };
 }
 
@@ -185,7 +242,7 @@ function getQuestionModeSettings() {
 
 function createReplyPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
-    return `あなたは優秀なコピーライターです。
+    let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
 
 --- 相手のメッセージ ---
@@ -194,11 +251,21 @@ ${settings.receivedMessage || '（メッセージが入力されていません�
 - **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n- **参照情報**:
 ${urlsText}\n
 以上の情報を用いて、自然で適切な返信文を作成してください。`;
+
+    if (settings.citeUrlOption === 'はい') {
+        prompt += `\n\nAIが参照した情報源のURLがある場合、返信文の末尾に「参照元: [URL]」の形式で記載してください。`;
+    }
+
+    // 追加質問の指示
+    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、もし追加で情報が必要だと感じた場合、またはユーザーが次に聞くべきだと考えられる質問があれば、箇条書きで3つまで提案してください。提案がない場合は「提案なし」と記載してください。
+
+[REPLY_START]\n`;
+    return prompt;
 }
 
 function createQuestionPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
-    return `あなたは指定された専門分野の専門家です。
+    let prompt = `あなたは指定された専門分野の専門家です。
 以下の質問に対して、後述する設定に基づいて、正確かつ分かりやすい回答を作成してください。
 
 --- 質問内容 ---
@@ -208,6 +275,10 @@ ${settings.question || '（質問が入力されていません）'}\n----------
 - **専門分野**: ${settings.expertise || '一般的な知識'}\n- **望ましい回答形式**: ${settings.outputFormat || '指定なし'}\n- **緊急度**: ${settings.urgency || '指定なし'}\n- **前提情報・文脈**: ${settings.assumptions || '指定なし'}\n- **参照情報**:
 ${urlsText}\n
 以上の情報を用いて、質の高い回答を作成してください。`;
+
+    // 追加質問の指示
+    prompt += `\n\n--- 追加質問の提案 ---\n上記の回答を生成するにあたり、もし追加で情報が必要だと感じた場合、またはユーザーが次に聞くべきだと考えられる質問があれば、箇条書きで3つまで提案してください。提案がない場合は「提案なし」と記載してください。\n\n[REPLY_START]\n`;
+    return prompt;
 }
 
 
@@ -290,9 +361,26 @@ generateBtn.addEventListener('click', async () => {
             }
         } else {
             const aiReply = data.reply;
-            const aiCitations = data.citations || []; // ★AI参照URLを受け取る
+            const aiCitations = data.citations || [];
+            const additionalQuestions = data.additionalQuestions || ''; // additionalQuestions を取得
+
             aiReplyBox.textContent = aiReply;
-            saveToHistory(settings, prompt, aiReply, aiCitations); // ★履歴に渡す
+
+            // 追加質問の表示ロジック
+            additionalQuestionsList.innerHTML = ''; // リストをクリア
+            if (additionalQuestions && additionalQuestions.trim() !== '提案なし') {
+                additionalQuestionsArea.classList.remove('hidden');
+                const questions = additionalQuestions.split('\n').filter(q => q.trim() !== '');
+                questions.forEach(q => {
+                    const li = document.createElement('li');
+                    li.textContent = q.trim();
+                    additionalQuestionsList.appendChild(li);
+                });
+            } else {
+                additionalQuestionsArea.classList.add('hidden'); // 提案がない場合は非表示
+            }
+
+            saveToHistory(settings, prompt, aiReply, aiCitations, additionalQuestions); // additionalQuestions を履歴に渡す
         }
 
     } catch (error) {
@@ -315,10 +403,10 @@ copyReplyBtn.addEventListener('click', () => copyToClipboard(aiReplyBox.textCont
 
 // --- 履歴関連の関数 ---
 
-// ★更新: saveToHistory (aiCitations引数を追加)
-function saveToHistory(settings, prompt, aiReply, aiCitations) {
+// ★更新: saveToHistory (aiCitations, additionalQuestions引数を追加)
+function saveToHistory(settings, prompt, aiReply, aiCitations, additionalQuestions) {
     let history = JSON.parse(localStorage.getItem('promptHistory') || '[]');
-    history.unshift({ settings, prompt, aiReply, aiCitations, timestamp: new Date().toISOString() });
+    history.unshift({ settings, prompt, aiReply, aiCitations, additionalQuestions, timestamp: new Date().toISOString() });
     history = history.slice(0, MAX_HISTORY_COUNT);
     localStorage.setItem('promptHistory', JSON.stringify(history));
 }
@@ -414,6 +502,29 @@ function renderHistory() {
             });
             controlsContainer.appendChild(toggleUrlsBtn);
         }
+
+        const additionalQuestions = item.additionalQuestions;
+        if (additionalQuestions && additionalQuestions.trim() !== '' && additionalQuestions.trim() !== '提案なし') {
+            const questionsContainer = document.createElement('div');
+            questionsContainer.className = 'history-questions-container hidden';
+            const questionsList = document.createElement('ul');
+            additionalQuestions.split('\n').filter(q => q.trim() !== '').forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = q.trim();
+                questionsList.appendChild(li);
+            });
+            questionsContainer.appendChild(questionsList);
+            mainContent.appendChild(questionsContainer);
+
+            const toggleQuestionsBtn = document.createElement('button');
+            toggleQuestionsBtn.className = 'toggle-history-questions-btn';
+            toggleQuestionsBtn.textContent = `AIからの追加質問の提案`;
+            toggleQuestionsBtn.addEventListener('click', () => {
+                const isHidden = questionsContainer.classList.toggle('hidden');
+                toggleQuestionsBtn.textContent = isHidden ? `AIからの追加質問の提案` : '質問を非表示';
+            });
+            controlsContainer.appendChild(toggleQuestionsBtn);
+        }
         
         historyItem.appendChild(mainContent);
         historyItem.appendChild(controlsContainer);
@@ -474,6 +585,21 @@ async function restoreFromHistory(index) {
 
     generatedPrompt.textContent = item.prompt;
     aiReplyBox.textContent = item.aiReply || '';
+
+    // additionalQuestions の復元表示
+    additionalQuestionsList.innerHTML = ''; // リストをクリア
+    if (item.additionalQuestions && item.additionalQuestions.trim() !== '' && item.additionalQuestions.trim() !== '提案なし') {
+        additionalQuestionsArea.classList.remove('hidden');
+        const questions = item.additionalQuestions.split('\n').filter(q => q.trim() !== '');
+        questions.forEach(q => {
+            const li = document.createElement('li');
+            li.textContent = q.trim();
+            additionalQuestionsList.appendChild(li);
+        });
+    } else {
+        additionalQuestionsArea.classList.add('hidden');
+    }
+
     promptDisplayArea.classList.remove('hidden');
     togglePromptBtn.textContent = 'プロンプトを非表示';
 

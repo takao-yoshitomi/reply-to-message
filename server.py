@@ -50,17 +50,45 @@ def generate():
         
         # AIの応答から引用情報を取得する
         response = model.generate_content(prompt)
-        
+        full_response_text = response.text
+
+        # 返信文と追加質問をパース
+        reply_start_tag = "[REPLY_START]"
+        questions_start_tag = "[QUESTIONS_START]"
+        reply_end_tag = "[REPLY_END]"
+        questions_end_tag = "[QUESTIONS_END]"
+
+        reply_content = ""
+        additional_questions = ""
+
+        if reply_start_tag in full_response_text:
+            reply_part = full_response_text.split(reply_start_tag, 1)[1]
+            if questions_start_tag in reply_part:
+                reply_content = reply_part.split(questions_start_tag, 1)[0].strip()
+                questions_part = reply_part.split(questions_start_tag, 1)[1].strip()
+                
+                # REPLY_ENDタグとQUESTIONS_ENDタグを考慮
+                if reply_end_tag in reply_content:
+                    reply_content = reply_content.split(reply_end_tag, 1)[0].strip()
+                if questions_end_tag in questions_part:
+                    additional_questions = questions_part.split(questions_end_tag, 1)[0].strip()
+                else:
+                    additional_questions = questions_part.strip() # QUESTIONS_ENDがない場合
+            else:
+                reply_content = reply_part.strip()
+                if reply_end_tag in reply_content:
+                    reply_content = reply_content.split(reply_end_tag, 1)[0].strip()
+        else:
+            reply_content = full_response_text.strip() # タグがない場合は全て返信文とみなす
+
         citations = []
-        # responseオブジェクトにcitation_metadata属性が存在し、かつ中身があるかを確認
         if hasattr(response, 'citation_metadata') and response.citation_metadata:
             if hasattr(response.citation_metadata, 'citation_sources'):
                  for source in response.citation_metadata.citation_sources:
                     if hasattr(source, 'uri') and source.uri:
                         citations.append(source.uri)
 
-        # 応答にcitationsリストを追加して返す
-        return jsonify({'reply': response.text, 'citations': citations})
+        return jsonify({'reply': reply_content, 'citations': citations, 'additionalQuestions': additional_questions})
 
     except google_exceptions.ResourceExhausted as e:
         print(f"Quota exceeded: {e}")
