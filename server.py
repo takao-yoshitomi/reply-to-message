@@ -17,11 +17,13 @@ def static_files(path):
 # 利用可能なモデル一覧を取得するためのAPIエンドポイント
 @app.route('/models', methods=['POST'])
 def list_models():
-    data = request.get_json()
-    if not data or 'apiKey' not in data:
-        return jsonify({'error': 'API key is required'}), 400
-    
-    api_key = data['apiKey']
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        data = request.get_json(silent=True)
+        if not data or 'apiKey' not in data or not data['apiKey']:
+            return jsonify({'error': 'API key is required. Set GEMINI_API_KEY environment variable or provide it in the UI.'}), 400
+        api_key = data['apiKey']
+
     try:
         genai.configure(api_key=api_key)
         model_list = []
@@ -37,10 +39,15 @@ def list_models():
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
-    if not data or 'prompt' not in data or 'apiKey' not in data or 'modelName' not in data:
-        return jsonify({'error': 'Invalid request. prompt, apiKey, and modelName are required.'}), 400
+    if not data or 'prompt' not in data or 'modelName' not in data:
+        return jsonify({'error': 'Invalid request. prompt and modelName are required.'}), 400
 
-    api_key = data['apiKey']
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        if 'apiKey' not in data or not data['apiKey']:
+            return jsonify({'error': 'API key is required. Set GEMINI_API_KEY environment variable or provide it in the UI.'}), 400
+        api_key = data['apiKey']
+
     prompt = data['prompt']
     model_name = data['modelName']
 
@@ -48,24 +55,19 @@ def generate():
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(model_name)
         
-        # AIの応答から引用情報を取得する
         response = model.generate_content(prompt)
 
-        # レスポンスが有効なパートを持っているか確認
         if not response.parts:
-            # 候補があるか、finish_reasonを確認
             finish_reason_text = ""
             if response.candidates and hasattr(response.candidates[0], 'finish_reason'):
                 finish_reason_text = f" (Finish Reason: {response.candidates[0].finish_reason.name})"
-
-            # セーフティ評価があるか確認
             safety_ratings_text = ""
             if response.candidates and hasattr(response.candidates[0], 'safety_ratings'):
                 ratings = [f"{rating.category.name}: {rating.probability.name}" for rating in response.candidates[0].safety_ratings if rating.probability.name != 'NEGLIGIBLE']
                 if ratings:
                     safety_ratings_text = f" (Safety Ratings: {', '.join(ratings)})"
             
-            error_message = f"AIからの応答が空でした。これは、コンテンツセーフティ機能によりブロックされた可能性があります。プロンプトの内容を修正して再度お試しください。{finish_reason_text}{safety_ratings_text}"
+            error_message = f"AIからの応答が空でした。これは、コンテンツセーフティ機能によりブロックされたか、利用枠を超過した可能性があります。{finish_reason_text}{safety_ratings_text}"
             print(f"Blocked response: {error_message}")
             return jsonify({'error': error_message, 'errorCode': 'BLOCKED_RESPONSE'}), 400
 
@@ -86,19 +88,18 @@ def generate():
                 reply_content = reply_part.split(questions_start_tag, 1)[0].strip()
                 questions_part = reply_part.split(questions_start_tag, 1)[1].strip()
                 
-                # REPLY_ENDタグとQUESTIONS_ENDタグを考慮
                 if reply_end_tag in reply_content:
                     reply_content = reply_content.split(reply_end_tag, 1)[0].strip()
                 if questions_end_tag in questions_part:
                     additional_questions = questions_part.split(questions_end_tag, 1)[0].strip()
                 else:
-                    additional_questions = questions_part.strip() # QUESTIONS_ENDがない場合
+                    additional_questions = questions_part.strip()
             else:
                 reply_content = reply_part.strip()
                 if reply_end_tag in reply_content:
                     reply_content = reply_content.split(reply_end_tag, 1)[0].strip()
         else:
-            reply_content = full_response_text.strip() # タグがない場合は全て返信文とみなす
+            reply_content = full_response_text.strip()
 
         citations = []
         if hasattr(response, 'citation_metadata') and response.citation_metadata:
