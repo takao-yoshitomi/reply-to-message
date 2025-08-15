@@ -60,10 +60,7 @@ let currentMode = 'reply';
 
 const updateModelList = async () => {
     const apiKey = apiKeyInput.value.trim();
-    if (!apiKey) {
-        alert('モデル一覧を更新するには、まず「APIキーを編集」からAPIキーを入力してください。');
-        return;
-    }
+    // 環境変数が設定されている場合を考慮し、UI上のAPIキー有無のチェックを削除
     modelSelector.innerHTML = '<option>モデルを読み込み中...</option>';
     modelSelector.disabled = true;
 
@@ -352,8 +349,9 @@ otherRelationshipText.addEventListener('focus', () => { otherRelationshipRadio.c
 // ★更新: メインのAI生成ボタン (Citations対応)
 generateBtn.addEventListener('click', async () => {
     const apiKey = apiKeyInput.value.trim();
-    if (!apiKey || !modelSelector.value || modelSelector.value === 'モデルを読み込み中...' || modelSelector.value === '読み込み失敗') {
-        alert('APIキーと使用モデルを正しく設定してください。');
+    // 環境変数が設定されている場合を考慮し、UI上のAPIキー有無のチェックを削除
+    if (!modelSelector.value || modelSelector.value === 'モデルを読み込み中...' || modelSelector.value === '読み込み失敗') {
+        alert('使用モデルを正しく設定してください。');
         return;
     }
 
