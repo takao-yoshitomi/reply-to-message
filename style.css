@@ -10,7 +10,7 @@
 
 body {
     font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color); /* 元の色に戻す */
     color: var(--text-color);
     margin: 0;
     padding: 20px;
@@ -20,10 +20,10 @@ body {
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background-color: var(--background-color);
+    background-color: var(--background-color); /* 元の色に戻す */
     padding: 20px 40px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* シャドウを復活 */
 }
 
 header {
@@ -42,9 +42,11 @@ header h1 {
 }
 
 section {
-    margin-bottom: 25px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 25px;
+    margin-bottom: 60px; /* セクション間の余白をさらに大きく */
+    background-color: #ffffff; /* 白い背景 */
+    padding: 20px; /* 内側の余白 */
+    border-radius: 8px; /* 角丸 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 軽いシャドウ */
 }
 
 section:last-child {
@@ -52,7 +54,6 @@ section:last-child {
 }
 
 h2 {
-    border-bottom: 2px solid var(--primary-color);
     padding-bottom: 10px;
     margin-bottom: 20px;
     font-size: 1.4em;
@@ -65,7 +66,7 @@ h2 {
 }
 
 .api-key-section {
-    padding-bottom: 10px; /* セクション下の余白 */
+    margin-bottom: 40px; /* セクション下の余白を大きく */
 }
 
 .setting-item, .setting-item-row {
@@ -221,10 +222,8 @@ button#addUrlBtn:hover, button#addUrlBtnQuestion:hover {
     align-items: center;
     gap: 20px;
     text-align: center;
-    margin: 40px 0;
-    padding: 30px 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    margin: 80px 0; /* 上下のマージンをさらに大きく */
+    padding: 0; /* パディングを削除 */
 }
 
 button#generateBtn {
@@ -273,7 +272,6 @@ button#generateBtn:disabled {
 }
 
 .output-section h2 {
-    border-bottom: none;
     margin-bottom: 0;
 }
 
@@ -311,7 +309,7 @@ button#generateBtn:disabled {
 
 /* --- History Section --- */
 .history-section {
-    margin-top: 40px;
+    margin-top: 60px; /* 上のマージンを大きく */
 }
 
 #historyContainer p {
@@ -426,8 +424,7 @@ footer {
 /* --- Mode Tabs --- */
 .tabs {
     display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: 25px;
+    margin-bottom: 40px; /* マージンを大きく */
     align-items: center; /* Vertically align items */
 }
 
@@ -549,21 +546,28 @@ footer {
     transform: translateY(-50%);
     background: transparent;
     border: none;
-    font-size: 1.6em;
     cursor: pointer;
-    color: #90A4AE;
+    color: var(--danger-color); /* 赤色に変更 */
     padding: 5px;
     line-height: 1;
     transition: color 0.2s;
 }
 
 .mic-button:hover {
-    color: var(--primary-color);
+    color: #c82333; /* ホバー時の色を少し濃い赤に */
 }
 
 .mic-button.is-recording {
-    color: var(--danger-color);
+    color: #ff6347; /* 録音中の色を明るい赤に */
     animation: pulse 1.5s infinite;
+}
+
+/* SVGアイコン自体のスタイル */
+.mic-button svg {
+    width: 32px; /* サイズを大きく */
+    height: 32px; /* サイズを大きく */
+    fill: currentColor; /* 親要素のcolorを継承 */
+    color: inherit; /* 親要素のcolorを継承 */
 }
 
 @keyframes pulse {

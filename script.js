@@ -337,7 +337,6 @@ function setupSpeechRecognition(micButton, targetTextarea) {
 
   recognition.onstart = () => {
     micButton.classList.add('is-recording');
-    micButton.textContent = '🔴'; // 録音中アイコン
     micButton.title = '録音中...クリックで停止';
     targetTextarea.focus();
   };
@@ -349,13 +348,11 @@ function setupSpeechRecognition(micButton, targetTextarea) {
 
   recognition.onend = () => {
     micButton.classList.remove('is-recording');
-    micButton.textContent = '🎤'; // 通常アイコン
     micButton.title = '音声入力';
   };
 
   recognition.onerror = (event) => {
     micButton.classList.remove('is-recording');
-    micButton.textContent = '🎤'; // 通常アイコン
     micButton.title = '音声入力';
     console.error('Speech recognition error:', event.error);
     alert(`音声認識エラー: ${event.error}`);
