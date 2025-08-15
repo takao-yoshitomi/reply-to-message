@@ -172,7 +172,7 @@ input[type="range"] {
 }
 
 /* --- URL List Styles --- */
-#urlContainer .url-item {
+#urlContainer .url-item, #urlContainerQuestion .url-item {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -185,7 +185,7 @@ input[type="range"] {
     font-size: 0.9em !important;
 }
 
-button.remove-url-btn, button#addUrlBtn {
+button.remove-url-btn, button#addUrlBtn, button#addUrlBtnQuestion {
     padding: 5px 10px;
     font-size: 0.9em;
     border-radius: 4px;
@@ -203,10 +203,10 @@ button.remove-url-btn:hover {
     background-color: #c82333;
 }
 
-button#addUrlBtn {
+button#addUrlBtn, button#addUrlBtnQuestion {
     background-color: #6c757d;
 }
-button#addUrlBtn:hover {
+button#addUrlBtn:hover, button#addUrlBtnQuestion:hover {
     background-color: #5a6268;
 }
 
@@ -218,6 +218,9 @@ button#addUrlBtn:hover {
     gap: 20px;
     text-align: center;
     margin: 30px 0;
+    /* ★要望: 区切り線を追加 */
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 button#generateBtn {
@@ -270,7 +273,7 @@ button#generateBtn:disabled {
     margin-bottom: 0;
 }
 
-#copyPromptBtn, #copyReplyBtn {
+#copyPromptBtn, #copyReplyBtn, #togglePromptBtn {
     background-color: #90A4AE;
     font-size: 0.9em;
     padding: 8px 15px;
@@ -282,7 +285,7 @@ button#generateBtn:disabled {
     transition: background-color 0.2s;
 }
 
-#copyPromptBtn:hover, #copyReplyBtn:hover {
+#copyPromptBtn:hover, #copyReplyBtn:hover, #togglePromptBtn:hover {
     background-color: #78909C;
 }
 
@@ -319,17 +322,19 @@ button#generateBtn:disabled {
     margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 20px;
+}
+
+.history-main-content {
+    flex-grow: 1;
+    min-width: 0; /* Prevent overflow */
 }
 
 .history-item pre {
     margin: 0;
-    flex-grow: 1;
     white-space: pre-wrap;
     word-wrap: break-word;
-    max-height: 120px;
-    overflow: auto;
     background-color: #f0f0f0;
     padding: 10px;
     border-radius: 4px;
@@ -348,15 +353,20 @@ button#generateBtn:disabled {
     align-items: stretch;
     flex-shrink: 0;
     gap: 8px;
+    width: 150px;
 }
 
 .history-timestamp {
     font-size: 0.8em;
     color: #888;
     text-align: center;
+    margin-bottom: 4px;
 }
 
-.history-item .restore-history-btn, .history-item .delete-history-btn {
+.history-item .restore-history-btn, 
+.history-item .delete-history-btn,
+.toggle-history-urls-btn,
+.toggle-history-questions-btn {
     font-size: 0.9em;
     padding: 8px 12px;
     border-radius: 4px;
@@ -364,20 +374,42 @@ button#generateBtn:disabled {
     color: white;
     cursor: pointer;
     transition: background-color 0.2s;
+    width: 100%;
 }
 
-.restore-history-btn {
-    background-color: #28a745;
-}
-.restore-history-btn:hover {
-    background-color: #218838;
+.restore-history-btn { background-color: #28a745; }
+.restore-history-btn:hover { background-color: #218838; }
+
+.delete-history-btn { background-color: var(--danger-color); }
+.delete-history-btn:hover { background-color: #c82333; }
+
+.toggle-history-urls-btn { background-color: #90A4AE; }
+.toggle-history-urls-btn:hover { background-color: #78909C; }
+.toggle-history-urls-btn.ai-citation { background-color: #17a2b8; }
+.toggle-history-urls-btn.ai-citation:hover { background-color: #138496; }
+
+.toggle-history-questions-btn { background-color: #ffc107; color: #212529; }
+.toggle-history-questions-btn:hover { background-color: #e0a800; }
+
+
+.history-urls-container, .history-questions-container {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.delete-history-btn {
-    background-color: var(--danger-color);
+.history-urls-container ul, .history-questions-container ul {
+    margin: 0;
+    padding-left: 20px;
 }
-.delete-history-btn:hover {
-    background-color: #c82333;
+
+.history-urls-container li, .history-questions-container li {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    word-break: break-all;
 }
 
 footer {
@@ -409,9 +441,6 @@ footer {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
     font-weight: bold;
-    background-color: var(--secondary-color);
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
 }
 
 .tab-button:hover {
@@ -423,49 +452,10 @@ footer {
     display: none !important;
 }
 
-/* --- URL List Styles for Question Mode --- */
-#urlContainerQuestion .url-item {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-button#addUrlBtnQuestion {
-    padding: 5px 10px;
-    font-size: 0.9em;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    color: white;
-    flex-shrink: 0;
-    transition: background-color 0.2s;
-    background-color: #6c757d;
-}
-button#addUrlBtnQuestion:hover {
-    background-color: #5a6268;
-}
-
 /* Adjust output header for new button */
 .output-section .output-header div {
     display: flex;
     gap: 10px;
-}
-
-#togglePromptBtn {
-    background-color: #6c757d;
-    font-size: 0.9em;
-    padding: 8px 15px;
-    font-weight: normal;
-    border-radius: 4px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#togglePromptBtn:hover {
-    background-color: #5a6268;
 }
 
 /* --- API Key Section --- */
@@ -473,11 +463,11 @@ button#addUrlBtnQuestion:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px; /* Add some space below the header */
+    margin-bottom: 15px;
 }
 
 .api-section-header h2 {
-    margin-bottom: 0; /* Remove default margin from h2 */
+    margin-bottom: 0;
 }
 
 #toggleApiKeyVisibilityBtn {
@@ -500,6 +490,7 @@ button#addUrlBtnQuestion:hover {
     border: 1px solid var(--border-color);
     border-radius: 6px;
     background-color: #fdfdfd;
+    margin-bottom: 20px;
 }
 
 .model-selector-container {
@@ -513,120 +504,99 @@ button#addUrlBtnQuestion:hover {
 }
 
 .model-selector-container button {
-    flex-shrink: 0; /* Prevent button from shrinking */
+    flex-shrink: 0;
 }
 
-/* --- History URL Toggle --- */
-.history-main-content {
-    flex-grow: 1;
-}
-
-.history-item {
-    flex-wrap: wrap; /* Allow wrapping for the URL container */
-}
-
-.toggle-history-urls-btn {
-    background-color: #90A4AE;
-    color: white;
-    width: 100%; /* Make button full width of controls */
-    margin-top: 4px;
-    padding: 8px 12px;
-    font-size: 0.9em;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.toggle-history-urls-btn:hover {
-    background-color: #78909C;
-}
-
-.history-urls-container {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    width: 100%; /* Take full width */
-}
-
-.history-urls-container ul {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.history-urls-container li {
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    word-break: break-all;
-}
-.toggle-history-urls-btn.ai-citation {
-    background-color: #17a2b8; /* A different color (info blue) */
-}
-
-.toggle-history-urls-btn.ai-citation:hover {
-    background-color: #138496;
-}
-
-/* --- Model Description --- */
-.model-description {
-    font-size: 0.8em; /* 文字を小さく */
-    color: #6c757d;   /* 色を変える (グレー系) */
-    margin-left: 5px; /* 少しスペースを空ける */
-}
-
-/* --- Model Description List --- */
-.model-description-list {
-    position: absolute;
-    background-color: white;
-    border: 1px solid var(--border-color);
+/* --- Additional Questions --- */
+.additional-questions-area {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    width: calc(100% - 2px); /* セレクトボックスと同じ幅 */
-    max-height: 300px;
-    overflow-y: auto;
-    margin-top: 5px;
+}
+.additional-questions-area h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #856404;
+}
+.additional-questions-area ul {
+    padding-left: 20px;
+    margin: 0;
 }
 
-.model-list-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-}
+/*
+--- ★要望: スマートフォン対応 (レスポンシブデザイン) ---
+*/
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
 
-.model-list-item:last-child {
-    border-bottom: none;
-}
+    .container {
+        padding: 15px;
+    }
 
-.model-list-item:hover {
-    background-color: var(--secondary-color);
-}
+    header {
+        margin: -15px -15px 15px -15px;
+        padding: 20px 0;
+    }
 
-.model-list-name {
-    font-weight: bold;
-    color: var(--text-color);
-}
+    header h1 {
+        font-size: 1.5em;
+    }
 
-.model-list-description {
-    font-size: 0.85em;
-    color: #6c757d;
-    margin-top: 2px;
-}
+    h2 {
+        font-size: 1.2em;
+    }
 
-button {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 立体感 */
-    transition: all 0.2s ease-in-out; /* ホバー時のアニメーション */
-}
+    .setting-item-row {
+        flex-direction: column;
+        gap: 0;
+    }
 
-button:hover {
-    transform: translateY(-1px); /* 少し浮き上がる */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 影を濃く */
-}
+    .setting-item.half-width {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .setting-item.half-width:last-child {
+        margin-bottom: 0;
+    }
 
-button:active {
-    transform: translateY(1px); /* クリック時に沈む */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* 影を薄く */
+    .radio-container {
+        gap: 8px 12px;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab-button {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
+
+    .history-item {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .history-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .history-controls .restore-history-btn,
+    .history-controls .delete-history-btn {
+        flex-grow: 1; /* Take up available space */
+    }
+
+    .history-timestamp {
+        width: 100%;
+        text-align: right;
+        margin-bottom: 0;
+        order: -1; /* Move timestamp to the top */
+    }
 }
