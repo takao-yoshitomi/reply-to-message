@@ -9,11 +9,13 @@ const apiKeySettingsArea = document.getElementById('apiKeySettingsArea');
 // Mode Tabs
 const replyModeTab = document.getElementById('replyModeTab');
 const questionModeTab = document.getElementById('questionModeTab');
+const clearInputsBtn = document.getElementById('clearInputsBtn'); // Clear button
 const replyModeSettings = document.getElementById('reply-mode-settings');
 const questionModeSettings = document.getElementById('question-mode-settings');
 
 // Reply Mode Settings
 const receivedMessage = document.getElementById('receivedMessage');
+const micReceivedMessage = document.getElementById('mic-receivedMessage'); // Newmic button
 const userRole = document.getElementById('userRole');
 const otherRelationshipText = document.getElementById('rel_other_text');
 const otherRelationshipRadio = document.getElementById('rel_other');
@@ -23,6 +25,7 @@ const politenessSlider = document.getElementById('politeness');
 const politenessValueSpan = document.getElementById('politenessValue');
 const charCount = document.getElementById('charCount');
 const replyContent = document.getElementById('replyContent');
+const micReplyContent = document.getElementById('mic-replyContent'); // New micbutton
 const urlContainer = document.getElementById('urlContainer');
 const addUrlBtn = document.getElementById('addUrlBtn');
 
@@ -270,8 +273,7 @@ function createReplyPrompt(settings) {
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
 \n文中に*や**は絶対に使用しないでください。読みにくいです。
-\n文章作成に当たり参照したサイトのURLを文末に記載してください。ただし実際に情報が存在するサイトで、尚且つ最新の情報を提供してください。もしない場合は文末に記載不要です
-
+\n返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成して下さい又、この情報について信頼出来る情報源を最大3つ、そのサイトが検索出来るタイトルを文末に記載してください（URLは不要）
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
@@ -279,7 +281,7 @@ ${settings.receivedMessage || '（メッセージが入力されていません�
 ${urlsText}\n\n\n文中に*や**は絶対に使用しないでください。読みにくいです。`;
 
         // 追加質問の指示
-    prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
+    prompt += `\n\n-------- 追加質問の提案 --------\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
 
    
     prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
@@ -305,6 +307,61 @@ ${urlsText}\n
     prompt += `\n\n--- 追加質問の提案 ---\n上記の回答を生成するにあたり、もし追加で情報が必要だと感じた場合、またはユーザーが次に聞くべきだと考えられる質問があれば、箇条書きで3つまで提案してください。提案がない場合は「提案なし」と記載してください。\n\n[REPLY_START]\n`;
     return prompt;
 }
+
+function setupSpeechRecognition(micButton, targetTextarea) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+
+  if (!SpeechRecognition) {
+    micButton.disabled = true;
+    micButton.title = "音声入力はサポートされていません";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  const speechRecognitionList = new SpeechGrammarList();
+  // recognition.grammars = speechRecognitionList; // 必要に応じて文法リストを設定
+  recognition.continuous = false; // 一度発言したら停止
+  recognition.lang = 'ja-JP'; // 日本語に設定
+  recognition.interimResults = false; // 中間結果は不要
+  recognition.maxAlternatives = 1; // 最も確信度の高い結果のみ
+
+  micButton.addEventListener('click', () => {
+    if (micButton.classList.contains('is-recording')) {
+      recognition.stop();
+      return;
+    }
+    recognition.start();
+  });
+
+  recognition.onstart = () => {
+    micButton.classList.add('is-recording');
+    micButton.textContent = '🔴'; // 録音中アイコン
+    micButton.title = '録音中...クリックで停止';
+    targetTextarea.focus();
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    targetTextarea.value += transcript; // 既存のテキストに追加
+  };
+
+  recognition.onend = () => {
+    micButton.classList.remove('is-recording');
+    micButton.textContent = '🎤'; // 通常アイコン
+    micButton.title = '音声入力';
+  };
+
+  recognition.onerror = (event) => {
+    micButton.classList.remove('is-recording');
+    micButton.textContent = '🎤'; // 通常アイコン
+    micButton.title = '音声入力';
+    console.error('Speech recognition error:', event.error);
+    alert(`音声認識エラー: ${event.error}`);
+  };
+}
+
 
 
 // --- イベントリスナー設定 ---
@@ -639,11 +696,59 @@ async function restoreFromHistory(index) {
     alert('入力内容を履歴から復元しました。');
 }
 
+function clearAllInputs() {
+    if (!confirm('すべての入力内容をクリアしてもよろしいですか？\n（生成履歴は消えません）')) {
+        return;
+    }
+
+    // 返答モードの入力欄をリセット
+    receivedMessage.value = '';
+    userRole.value = '税理士事務所職員'; // デフォルト値
+    document.getElementById('rel_client').checked = true;
+    otherRelationshipText.value = '';
+    sentimentSlider.value = 100;
+    sentimentValueSpan.textContent = '100';
+    politenessSlider.value = 80;
+    politenessValueSpan.textContent = '80';
+    charCount.value = '';
+    document.getElementById('punc_yes').checked = true;
+    replyContent.value = '';
+    urlContainer.innerHTML = '';
+    addUrlField(urlContainer);
+
+    // 質問モードの入力欄をリセット
+    questionContent.value = '';
+    expertise.value = '';
+    outputFormat.value = '';
+    urgency.value = 'medium';
+    assumptions.value = '';
+    urlContainerQuestion.innerHTML = '';
+    addUrlField(urlContainerQuestion);
+
+    // 出力エリアをリセット
+    generatedPrompt.textContent = 'ここにプロンプトが表示されます...';
+    aiReplyBox.textContent = 'ここにAIからの返信が表示されます...';
+    additionalQuestionsArea.classList.add('hidden');
+    additionalQuestionsList.innerHTML = '';
+    
+    promptDisplayArea.classList.add('hidden');
+    togglePromptBtn.textContent = 'プロンプトを表示';
+
+    alert('入力内容をクリアしました。');
+}
+
+// --- イベントリスナー設定 (追加) ---
+clearInputsBtn.addEventListener('click', clearAllInputs);
+
 // --- 初期化処理 ---
 (async () => {
     apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
     addUrlField(urlContainer);
     addUrlField(urlContainerQuestion);
+
+    setupSpeechRecognition(micReceivedMessage, receivedMessage);
+    setupSpeechRecognition(micReplyContent, replyContent);
+
     renderHistory();
     // ★APIキーがあればモデルリストを自動更新
     if (apiKeyInput.value) {

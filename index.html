@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI返信文作成アシスタント</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -36,13 +37,17 @@
                 <div class="tabs">
                     <button id="replyModeTab" class="tab-button active">返答モード</button>
                     <button id="questionModeTab" class="tab-button">質問モード</button>
+                    <button id="clearInputsBtn" title="入力内容をクリア">クリア</button>
                 </div>
             </section>
 
             <div id="reply-mode-settings">
                 <section class="input-section">
                     <h2>受け取ったメッセージ</h2>
-                    <textarea id="receivedMessage" placeholder="ここに相手からのメッセージを貼り付けてください..."></textarea>
+                    <div class="textarea-with-button">
+                        <textarea id="receivedMessage" placeholder="ここに相手からのメッセージを貼り付けてください..."></textarea>
+                        <button type="button" id="mic-receivedMessage" class="mic-button" title="音声入力">🎤</button>
+                    </div>
                 </section>
 
                 <section class="settings-section">
@@ -87,7 +92,10 @@
                     </div>
                     <div class="setting-item">
                         <label for="replyContent">返信に含めるべき内容:</label>
-                        <textarea id="replyContent" rows="3" placeholder="例: 次回の打ち合わせ日程の提案、箇条書きで、お会いする文言は入れない等"></textarea>
+                        <div class="textarea-with-button">
+                            <textarea id="replyContent" rows="3" placeholder="例: 次回の打ち合わせ日程の提案、箇条書きで、お会いする文言は入れない等"></textarea>
+                            <button type="button" id="mic-replyContent" class="mic-button" title="音声入力">🎤</button>
+                        </div>
                     </div>
                     
                     <div class="setting-item">
