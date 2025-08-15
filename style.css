@@ -42,11 +42,11 @@ header h1 {
 }
 
 section {
-    margin-bottom: 60px; /* セクション間の余白をさらに大きく */
+    margin-bottom: 15px; /* セクション間の余白を狭く */
     background-color: #ffffff; /* 白い背景 */
     padding: 20px; /* 内側の余白 */
     border-radius: 8px; /* 角丸 */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 軽いシャドウ */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* シャドウを濃く */
 }
 
 section:last-child {
@@ -55,7 +55,7 @@ section:last-child {
 
 h2 {
     padding-bottom: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-size: 1.4em;
     color: var(--text-color);
 }
@@ -66,11 +66,11 @@ h2 {
 }
 
 .api-key-section {
-    margin-bottom: 40px; /* セクション下の余白を大きく */
+    margin-bottom: 15px; /* セクション下の余白を大きく */
 }
 
 .setting-item, .setting-item-row {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .setting-item-row {
@@ -126,10 +126,17 @@ select:focus {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 #updateModelsBtn:hover {
     background-color: #5a6268;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+#updateModelsBtn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 textarea {
@@ -198,7 +205,8 @@ button.remove-url-btn, button#addUrlBtn, button#addUrlBtnQuestion {
     cursor: pointer;
     color: white;
     flex-shrink: 0;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* box-shadowも追加 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 
 button.remove-url-btn {
@@ -206,6 +214,12 @@ button.remove-url-btn {
 }
 button.remove-url-btn:hover {
     background-color: #c82333;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+button.remove-url-btn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 button#addUrlBtn, button#addUrlBtnQuestion {
@@ -213,6 +227,12 @@ button#addUrlBtn, button#addUrlBtnQuestion {
 }
 button#addUrlBtn:hover, button#addUrlBtnQuestion:hover {
     background-color: #5a6268;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+button#addUrlBtn:active, button#addUrlBtnQuestion:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 /* --- Main Action Area --- */
@@ -235,18 +255,26 @@ button#generateBtn {
     font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s; /* box-shadowも追加 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* 立体感 */
 }
 
 button#generateBtn:hover {
     background-color: var(--hover-color);
-    transform: translateY(-2px);
+    transform: translateY(-3px); /* 少し大きく浮き上がる */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.1); /* ホバー時の影 */
+}
+
+button#generateBtn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); /* 押された時の影 */
 }
 
 button#generateBtn:disabled {
     background-color: #a9cce3;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none; /* 無効時は影なし */
 }
 
 .loader {
@@ -284,11 +312,19 @@ button#generateBtn:disabled {
     border: none;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* box-shadowも追加 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 
 #copyPromptBtn:hover, #copyReplyBtn:hover, #togglePromptBtn:hover {
     background-color: #78909C;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+
+#copyPromptBtn:active, #copyReplyBtn:active, #togglePromptBtn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 .output-section pre, .ai-reply-box {
@@ -375,23 +411,56 @@ button#generateBtn:disabled {
     border: none;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* box-shadowも追加 */
     width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 
 .restore-history-btn { background-color: #28a745; }
-.restore-history-btn:hover { background-color: #218838; }
+.restore-history-btn:hover { 
+    background-color: #218838; 
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+.restore-history-btn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
+}
 
 .delete-history-btn { background-color: var(--danger-color); }
-.delete-history-btn:hover { background-color: #c82333; }
+.delete-history-btn:hover { 
+    background-color: #c82333; 
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+.delete-history-btn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
+}
 
 .toggle-history-urls-btn { background-color: #90A4AE; }
-.toggle-history-urls-btn:hover { background-color: #78909C; }
+.toggle-history-urls-btn:hover { 
+    background-color: #78909C; 
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+.toggle-history-urls-btn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
+}
 .toggle-history-urls-btn.ai-citation { background-color: #17a2b8; }
 .toggle-history-urls-btn.ai-citation:hover { background-color: #138496; }
 
 .toggle-history-questions-btn { background-color: #ffc107; color: #212529; }
-.toggle-history-questions-btn:hover { background-color: #e0a800; }
+.toggle-history-questions-btn:hover { 
+    background-color: #e0a800; 
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+.toggle-history-questions-btn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
+}
 
 
 .history-urls-container, .history-questions-container {
@@ -458,11 +527,19 @@ footer {
     padding: 6px 12px;
     font-size: 0.9em;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* box-shadowも追加 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 
 #clearInputsBtn:hover {
     background-color: #788888;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+
+#clearInputsBtn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 
@@ -497,11 +574,19 @@ footer {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 立体感 */
 }
 
 #toggleApiKeyVisibilityBtn:hover {
     background-color: #5a6268;
+    transform: translateY(-1px); /* 少し浮き上がる */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+}
+
+#toggleApiKeyVisibilityBtn:active {
+    transform: translateY(0); /* 押された時に沈む */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 押された時の影 */
 }
 
 #apiKeySettingsArea {
@@ -544,17 +629,28 @@ footer {
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    background: transparent;
+    background-color: #f0f0f0; /* 薄いグレーの背景 */
     border: none;
     cursor: pointer;
     color: var(--danger-color); /* 赤色に変更 */
-    padding: 5px;
+    padding: 10px; /* パディングを増やす */
+    border-radius: 50%; /* 円形にする */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 軽い影 */
     line-height: 1;
-    transition: color 0.2s;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; /* トランジションを追加 */
 }
 
 .mic-button:hover {
+    background-color: #e0e0e0; /* ホバー時の背景色 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* ホバー時の影 */
+    transform: translateY(-50%) scale(1.05); /* 少し浮き上がる */
     color: #c82333; /* ホバー時の色を少し濃い赤に */
+}
+
+.mic-button:active {
+    background-color: #d0d0d0; /* アクティブ時の背景色 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* アクティブ時の影 */
+    transform: translateY(-50%) scale(0.98); /* 押された時に沈む */
 }
 
 .mic-button.is-recording {
