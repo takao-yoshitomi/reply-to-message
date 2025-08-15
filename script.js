@@ -272,7 +272,7 @@ function createReplyPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
-\n\n文中に*や**は絶対に使用しないでください。読みにくいです。
+\n文中に*や**は絶対に使用しないでください。読みにくいです。
 \n文章作成に当たり参照したサイトのURLを文末に記載してください。ただし実際に情報が存在するサイトで、尚且つ最新の情報を提供してください。もしない場合は文末に記載不要です
 
 --- 相手のメッセージ ---
@@ -284,6 +284,7 @@ ${urlsText}\n\n\n文中に*や**は絶対に使用しないでください。読
         // 追加質問の指示
     prompt += `\n\n--- 追加質問の提案 ---\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
 
+   
     prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
 
     prompt += `\n\n[REPLY_START]\n`;
@@ -383,6 +384,10 @@ generateBtn.addEventListener('click', async () => {
             if (data.errorCode === 'QUOTA_EXCEEDED') {
                 alert('選択したモデルの無料利用枠を使い切りました。別のモデルを選択して再度お試しください。');
                 aiReplyBox.textContent = '利用枠の上限に達しました。モデルを変更してください。';
+            } else if (data.errorCode === 'BLOCKED_RESPONSE') {
+                // サーバー側で設定した新しいエラーコード
+                alert(data.error); // サーバーからの詳細なエラーメッセージを表示
+                aiReplyBox.textContent = data.error;
             } else {
                 throw new Error(data.error || '不明なエラーが発生しました。');
             }

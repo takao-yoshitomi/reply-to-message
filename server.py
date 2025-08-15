@@ -50,6 +50,25 @@ def generate():
         
         # AIの応答から引用情報を取得する
         response = model.generate_content(prompt)
+
+        # レスポンスが有効なパートを持っているか確認
+        if not response.parts:
+            # 候補があるか、finish_reasonを確認
+            finish_reason_text = ""
+            if response.candidates and hasattr(response.candidates[0], 'finish_reason'):
+                finish_reason_text = f" (Finish Reason: {response.candidates[0].finish_reason.name})"
+
+            # セーフティ評価があるか確認
+            safety_ratings_text = ""
+            if response.candidates and hasattr(response.candidates[0], 'safety_ratings'):
+                ratings = [f"{rating.category.name}: {rating.probability.name}" for rating in response.candidates[0].safety_ratings if rating.probability.name != 'NEGLIGIBLE']
+                if ratings:
+                    safety_ratings_text = f" (Safety Ratings: {', '.join(ratings)})"
+            
+            error_message = f"AIからの応答が空でした。これは、コンテンツセーフティ機能によりブロックされた可能性があります。プロンプトの内容を修正して再度お試しください。{finish_reason_text}{safety_ratings_text}"
+            print(f"Blocked response: {error_message}")
+            return jsonify({'error': error_message, 'errorCode': 'BLOCKED_RESPONSE'}), 400
+
         full_response_text = response.text
 
         # 返信文と追加質問をパース
