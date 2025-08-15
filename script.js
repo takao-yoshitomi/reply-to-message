@@ -743,8 +743,17 @@ clearInputsBtn.addEventListener('click', clearAllInputs);
     addUrlField(urlContainer);
     addUrlField(urlContainerQuestion);
 
-    setupSpeechRecognition(micReceivedMessage, receivedMessage);
-    setupSpeechRecognition(micReplyContent, replyContent);
+    // スマホ（特にiOS）の場合、マイクボタンを非表示にする
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile || isIOS) { // iOSだけでなく、一般的なモバイルデバイスでも非表示にする
+        if (micReceivedMessage) micReceivedMessage.style.display = 'none';
+        if (micReplyContent) micReplyContent.style.display = 'none';
+    } else {
+        setupSpeechRecognition(micReceivedMessage, receivedMessage);
+        setupSpeechRecognition(micReplyContent, replyContent);
+    }
 
     renderHistory();
     // ★APIキーがあればモデルリストを自動更新
