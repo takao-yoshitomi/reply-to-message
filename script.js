@@ -254,7 +254,6 @@ function getReplyModeSettings() {
                 relationshipRadio: document.querySelector('input[name="relationship"]:checked').id,
         selectedModel: modelSelector.value
     };
-    console.log('getReplyModeSettings - settings:', settings);
     return settings;
 }
 
@@ -299,7 +298,6 @@ ${urlsText}\n\n\n文中に*や**は絶対に使用しないでください。読
 
 
 function createReplyPrompt(settings) {
-    console.log('settings.showExtra:', settings.showExtra);
 
     // 参照URLをテキスト化
     const urlsText = settings.referenceUrls.length > 0

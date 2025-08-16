@@ -44,7 +44,7 @@ header h1 {
     justify-content: center; /* 中央揃え */
 
     /*justify-content: flex-start; /* 左寄せ */
-    padding-left: 20px; /* 左側にパディングを追加 */
+    padding-left: 10px; /* 左側にパディングを追加 */
     position: relative; /* アイコンの絶対配置の基準 */
 }
 
@@ -96,6 +96,11 @@ h2 {
 }
 
 .half-width {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-item-row .setting-item {
     flex: 1;
     min-width: 0;
 }
