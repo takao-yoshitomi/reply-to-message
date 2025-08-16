@@ -604,10 +604,11 @@ footer {
     margin-bottom: 20px;
 }
 
-.info-modal-content h3 {
-    color: #555;
+.info-modal-content h2 {
+    color: #6fa8dc;
     margin-top: 20px;
     margin-bottom: 10px;
+    text-align: center; /* 追加 */
 }
 
 .info-modal-content ul {
