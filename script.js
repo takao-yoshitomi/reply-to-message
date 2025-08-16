@@ -239,7 +239,7 @@ function getReplyModeSettings() {
     let relationship = document.querySelector('input[name="relationship"]:checked').value;
     if (relationship === 'other') relationship = otherRelationshipText.value || 'その他';
     const urlInputs = Array.from(urlContainer.querySelectorAll('.url-input')).map(input => input.value.trim()).filter(url => url);
-    return {
+    const settings = {
         mode: 'reply',
         receivedMessage: receivedMessage.value,
         userRole: userRole.value,
@@ -248,11 +248,14 @@ function getReplyModeSettings() {
         politeness: politenessSlider.value,
         charCount: charCount.value,
         punctuation: document.querySelector('input[name="punctuation"]:checked').value,
+        showExtra: document.querySelector('input[name="show_extra"]:checked').value,
         replyContent: replyContent.value,
         referenceUrls: urlInputs,
                 relationshipRadio: document.querySelector('input[name="relationship"]:checked').id,
         selectedModel: modelSelector.value
     };
+    console.log('getReplyModeSettings - settings:', settings);
+    return settings;
 }
 
 function getQuestionModeSettings() {
@@ -269,27 +272,86 @@ function getQuestionModeSettings() {
     };
 }
 
-function createReplyPrompt(settings) {
+/*function createReplyPrompt(settings) {
+    console.log('settings.showExtra:', settings.showExtra);
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
 \n文中に*や**は絶対に使用しないでください。読みにくいです。
-\n返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成して下さい。又、返信内容に引用した信頼出来る情報源を最大3つ、そのサイトが確実に検索出来るURLを文末に記載してください（検索できないものは不要です）
+\n返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成して下さい。
+
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
 - **役割**: ${settings.userRole || '指定なし'}\n- **相手との関係性**: ${settings.relationship || '指定なし'}\n- **感情の方向性 (否定的/肯定的)**: ${settings.sentiment}\n- **丁寧度**: ${settings.politeness}\n- **返信の概算文字数**: ${settings.charCount || '指定なし'}\n- **句読点**: ${settings.punctuation}\n- **返信に含めるべき内容**: ${settings.replyContent || '指定なし'}\n- **参照情報**:
 ${urlsText}\n\n\n文中に*や**は絶対に使用しないでください。読みにくいです。`;
 
-        // 追加質問の指示
-    prompt += `\n\n-------- 追加質問の提案 --------\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
+    // settings.showExtra が「はい」の場合のみ追加
+    if (settings.showExtra === 'あり') {
+        prompt += `\n\n-------- 追加質問の提案 --------\n上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。\n`;
+        prompt += `\n\n-------- 引用サイト添付 --------\n返信内容に引用した信頼出来る情報源を最大3つ、そのサイトが確実に検索出来ることを再度確認したURLを文末に記載してください（検索できないものは不要です）\n`;
+    }
 
-   
-    prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。`;
-
+    prompt += `\n\n以上の情報を用いて、自然で適切な返信文を作成してください。\n`;
     prompt += `\n\n[REPLY_START]\n`;
     return prompt;
+}*/
+
+
+function createReplyPrompt(settings) {
+    console.log('settings.showExtra:', settings.showExtra);
+
+    // 参照URLをテキスト化
+    const urlsText = settings.referenceUrls.length > 0
+        ? settings.referenceUrls.map(url => `- ${url}`).join('\n')
+        : '指定なし';
+
+    // 基本プロンプト
+    let prompt = `あなたは優秀なコピーライターです。
+以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
+文中に*や**は絶対に使用しないでください。読みにくいです。
+返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成してください。
+
+--- 相手のメッセージ ---
+${settings.receivedMessage || '（メッセージが入力されていません）'}
+------------------------
+設定:
+- 役割: ${settings.userRole || '指定なし'}
+- 相手との関係性: ${settings.relationship || '指定なし'}
+- 感情の方向性 (否定的/肯定的): ${settings.sentiment}
+- 丁寧度: ${settings.politeness}
+- 返信の概算文字数: ${settings.charCount || '指定なし'}
+- 句読点: ${settings.punctuation}
+- 返信に含めるべき内容: ${settings.replyContent || '指定なし'}
+- 参照情報:
+${urlsText}
+
+文中に*や**は絶対に使用しないでください。読みにくいです。`;
+
+    // settings.showExtra が「あり」の場合のみ追加指示
+    if (settings.showExtra === 'あり') {
+        prompt += `
+
+-------- 追加質問の提案 --------
+上記の返信文を生成するにあたり、追加で情報が必要だと感じた場合、箇条書きで3つまで①②③と提案してください。
+
+-------- 引用サイト添付 --------
+返信内容に引用する情報は必ず**検索可能で信頼できる公式サイトやニュースサイト**に限定してください。
+最大3件まで、本文中で使用した箇所に対応させてください。
+存在しないサイトや確認できないURLは書かないでください。`;
+    }
+
+    prompt += `
+
+以上の情報を用いて、自然で適切な返信文を作成してください。
+
+[REPLY_START]
+`;
+
+    return prompt;
 }
+
+
 
 function createQuestionPrompt(settings) {
     const urlsText = settings.referenceUrls.length > 0 ? settings.referenceUrls.map(url => `- ${url}`).join('\n') : '指定なし';
@@ -660,6 +722,7 @@ async function restoreFromHistory(index) {
         politenessValueSpan.textContent = settings.politeness;
         charCount.value = settings.charCount;
         document.querySelector(`input[name="punctuation"][value="${settings.punctuation || 'あり'}"]`).checked = true;
+        document.querySelector(`input[name="show_extra"][value="${settings.showExtra || 'あり'}"]`).checked = true; 
         replyContent.value = settings.replyContent;
         const radioToSelect = document.getElementById(settings.relationshipRadio);
         if (radioToSelect) radioToSelect.checked = true;
@@ -726,6 +789,7 @@ function clearAllInputs() {
     politenessValueSpan.textContent = '80';
     charCount.value = '';
     document.getElementById('punc_yes').checked = true;
+    document.getElementById('show_extra_yes').checked = true;
     replyContent.value = '';
     urlContainer.innerHTML = '';
     addUrlField(urlContainer);
