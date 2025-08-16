@@ -36,9 +36,26 @@ header {
 
 header h1 {
     color: white; /* 文字色を白に */
-    text-align: center;
+    /* text-align: center; */ /* 削除 */
     margin-bottom: 0; /* グラデーションの範囲に収めるためマージンを0に */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 文字に影を追加 */
+    display: flex; /* Flexboxを有効にする */
+    align-items: center; /* 垂直方向中央揃え */
+    justify-content: center; /* 中央揃え */
+
+    /*justify-content: flex-start; /* 左寄せ */
+    padding-left: 20px; /* 左側にパディングを追加 */
+    position: relative; /* アイコンの絶対配置の基準 */
+}
+
+.header-icon {
+    width: 70px; /* アイコンのサイズを小さく */
+    height: 70px; /* アイコンのサイズを小さく */
+    margin-right: 20px; /* アイコンとテキストの間にスペース */
+    /* position: absolute; */ /* これを有効にするとh1のテキストがずれるので、flexboxで対応 */
+    /* top: 50%; */
+    /* left: 10px; */
+    /* transform: translateY(-50%); */
 }
 
 section {
