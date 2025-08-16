@@ -143,36 +143,37 @@ const updateModelList = async () => {
         // ソート後のインデックスに基づいて星の数を割り当て
         ratedModels = ratedModels.map((model, index) => {
             let starCount;
-
-            // 基本の星の割り当て (上から5個が5つ星、次の5個が4つ星...)
-            if (index < 5) {
-                starCount = 5;
-            } else if (index < 10) {
-                starCount = 4;
-            } else if (index < 15) {
-                starCount = 3;
-            } else if (index < 20) {
-                starCount = 2;
-            } else {
-                starCount = 1;
-            }
-
-            // pro は +1、preview は -1
             const modelName = model.name.replace('models/', '');
-            if (modelName.includes('pro')) {
-                starCount += 1;
-            }
-            if (modelName.includes('preview')) {
-                starCount -= 1;
-            }
 
-            // 最高は5、最低は1に制限
-            starCount = Math.max(1, Math.min(5, starCount));
+            // preview版は星1つに固定
+            if (modelName.includes('preview')) {
+                starCount = 1;
+            } else {
+                // 基本の星の割り当て (上から5個が5つ星、次の5個が4つ星...)
+                if (index < 5) {
+                    starCount = 5;
+                } else if (index < 10) {
+                    starCount = 4;
+                } else if (index < 15) {
+                    starCount = 3;
+                } else if (index < 20) {
+                    starCount = 2;
+                } else {
+                    starCount = 1;
+                }
+
+                // pro は +1
+                if (modelName.includes('pro')) {
+                    starCount += 1;
+                }
+                // 最高は5、最低は1に制限
+                starCount = Math.max(1, Math.min(5, starCount));
+            }
 
             return {
                 ...model,
                 rating: starCount,
-                displayText: `${ '★'.repeat(starCount) }${ '☆'.repeat(5 - starCount) } ${model.displayText}`
+                displayText: `${'★'.repeat(starCount)}${'☆'.repeat(5 - starCount)} ${model.displayText}`
             };
         });
 

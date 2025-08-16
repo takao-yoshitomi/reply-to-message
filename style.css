@@ -33,7 +33,7 @@ header {
     margin: -20px -40px 20px -40px; /* container のパディングを打ち消し、下部にマージン */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 影を追加 */
 }
-
+/*AIアイコン*/
 header h1 {
     color: white; /* 文字色を白に */
     /* text-align: center; */ /* 削除 */
@@ -51,7 +51,7 @@ header h1 {
 .header-icon {
     width: 70px; /* アイコンのサイズを小さく */
     height: 70px; /* アイコンのサイズを小さく */
-    margin-right: 20px; /* アイコンとテキストの間にスペース */
+    margin-right: 10px; /* アイコンとテキストの間にスペース */
     /* position: absolute; */ /* これを有効にするとh1のテキストがずれるので、flexboxで対応 */
     /* top: 50%; */
     /* left: 10px; */
