@@ -565,7 +565,83 @@ footer {
 }
 
 
-/* --- Utility Classes --- */
+/* Info Modal Styles */
+.info-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* 背景をぼかす */
+    -webkit-backdrop-filter: blur(5px); /* Safari対応 */
+    display: flex; /* 中央寄せのため */
+    justify-content: center; /* 中央寄せのため */
+    align-items: center; /* 中央寄せのため */
+}
+
+.info-modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Removed to use flexbox for centering */
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more responsive */
+    max-width: 700px; /* Max width for larger screens */
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    max-height: 90vh; /* 画面の高さの90%まで */
+    overflow-y: auto; /* 内容がはみ出したらスクロール */
+}
+
+.info-modal-content h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.info-modal-content h3 {
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.info-modal-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.info-modal-content li {
+    margin-bottom: 5px;
+}
+
+.info-modal-content p {
+    margin-bottom: 15px;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Hidden class for JavaScript toggling */
 .hidden {
     display: none !important;
 }

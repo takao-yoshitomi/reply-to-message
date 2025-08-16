@@ -6,6 +6,11 @@ const modelSelector = document.getElementById('modelSelector');
 const toggleApiKeyVisibilityBtn = document.getElementById('toggleApiKeyVisibilityBtn');
 const apiKeySettingsArea = document.getElementById('apiKeySettingsArea');
 
+// Info Modal
+const infoIcon = document.getElementById('infoIcon');
+const infoModal = document.getElementById('infoModal');
+const closeModalButton = infoModal.querySelector('.close-button');
+
 // Mode Tabs
 const replyModeTab = document.getElementById('replyModeTab');
 const questionModeTab = document.getElementById('questionModeTab');
@@ -439,6 +444,22 @@ function setupSpeechRecognition(micButton, targetTextarea) {
 
 
 // --- イベントリスナー設定 ---
+
+// Info Modal Event Listeners
+infoIcon.addEventListener('click', () => {
+    infoModal.classList.remove('hidden');
+});
+
+closeModalButton.addEventListener('click', () => {
+    infoModal.classList.add('hidden');
+});
+
+// モーダルの外側をクリックで閉じる
+window.addEventListener('click', (event) => {
+    if (event.target === infoModal) {
+        infoModal.classList.add('hidden');
+    }
+});
 
 toggleApiKeyVisibilityBtn.addEventListener('click', () => {
     const isHidden = apiKeySettingsArea.classList.contains('hidden');

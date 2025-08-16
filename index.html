@@ -10,7 +10,46 @@
 <body>
     <div class="container">
         <header>
-            <h1><img src="favicon.ico" alt="AI Icon" class="header-icon">文書作成アシスタント</h1>
+            <h1><img src="favicon.ico" alt="AI Icon" class="header-icon" id="infoIcon">文書作成アシスタント</h1>
+            <!-- 説明文表示エリア -->
+            <div id="infoModal" class="info-modal hidden">
+                <div class="info-modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>利用方法</h2>
+                    <p>このアプリケーションはAIのAPIを利用してメッセージの返信文や質問を生成します。</p>
+                    <h3>返信モード</h3>
+                    <ul>
+                        <strong>①</strong>「更新」ボタンを押し利用できるAIを取り込みます<br>
+                        <strong>②</strong> 使用モデルを選択します。<br>
+                        【推奨】gemini-2.5-flash-シリーズ<br>
+                        【推奨】gemini-2.0-flash-シリーズ<br>
+                        【推奨】gemini-1.5-flash-シリーズ<br>
+                        ※pro-シリーズは直ぐに無料枠が終わるので通常では非推奨です<br>
+                        <br>
+                        <strong>③</strong> モードを選択します（現在は返答モードのみ） <br>
+                        <strong>④</strong> 受取ったメッセージを入力欄にコピペします。（音声入力も可）<br>
+                        <strong>⑤</strong> 返答の設定を行います<br>
+                        <strong>⑥</strong>「AIで変身を生成」をクリックします<br>
+                        <strong>⑦</strong> 生成されたら内容を吟味し修正を行って下さい。<br>
+                        <strong>⑧</strong> 生成した返信内容をコピペし返信します。<br>
+                        <strong>⑨</strong> 過去の生成履歴を確認し、復元することもできます。<br>
+                     </ul>    
+                     <h3>質問モード（作成中）</h3>
+                    
+                    <h2>注意 ‼</h2>   
+                        <li>専門的な税務や最新の法改正に関するご質問は、高度なAIモデルが提供されているサービスをご利用いただく方が確実な回答を得られます。このプロンプトをコピーして公式サイトをご活用下さい。</li> 
+                        <li>AIが生成するURLは不確かなものが生じている可能性がありますので、もし添付等される時には必ずサイトをご確認下さい。</li>
+                    </ul>
+                    
+                    <ul>
+                        <strong></strong><br>
+                        <strong></strong><br>
+                        <strong></strong><br>
+                        <strong></strong><br>
+                        <strong></strong><br>
+                    </ul>
+                </div>
+            </div>
         </header>
         <main>
             <section class="api-key-section">
