@@ -376,6 +376,7 @@ function setupSpeechRecognition(micButton, targetTextarea) {
 
 
 
+
 // --- イベントリスナー設定 ---
 
 toggleApiKeyVisibilityBtn.addEventListener('click', () => {
