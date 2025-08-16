@@ -273,7 +273,7 @@ function createReplyPrompt(settings) {
     let prompt = `あなたは優秀なコピーライターです。
 以下のメッセージに対するLINEの返信文を、後述する設定に基づいて作成してください。
 \n文中に*や**は絶対に使用しないでください。読みにくいです。
-\n返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成して下さい又、この情報について信頼出来る情報源を最大3つ、そのサイトが検索出来るタイトルを文末に記載してください（URLは不要）
+\n返信内容作成にあたり、webサイトで10件前後、最新の情報を調べてから2人の優秀な専門家で話し合った後、返信文を作成して下さい。又、返信内容に引用した信頼出来る情報源を最大3つ、そのサイトが確実に検索出来るURLを文末に記載してください（検索できないものは不要です）
 --- 相手のメッセージ ---
 ${settings.receivedMessage || '（メッセージが入力されていません）'}\n------------------------\n
 設定:
@@ -310,70 +310,69 @@ ${urlsText}\n
 
 
 function setupSpeechRecognition(micButton, targetTextarea) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-    const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+  const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 
-    if (!SpeechRecognition) {
-        micButton.disabled = true;
-        micButton.title = "音声入力はサポートされていません";
-        return;
+  if (!SpeechRecognition) {
+    micButton.disabled = true;
+    micButton.title = "音声入力はサポートされていません";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  const speechRecognitionList = new SpeechGrammarList();
+  // recognition.grammars = speechRecognitionList; // 必要に応じて文法リストを設定
+  recognition.continuous = true; // 連続して発言を認識
+  recognition.lang = 'ja-JP'; // 日本語に設定
+  recognition.interimResults = true; // 中間結果も取得
+
+  micButton.addEventListener('click', () => {
+    if (micButton.classList.contains('is-recording')) {
+      recognition.stop();
+      return;
     }
+    recognition.start();
+  });
 
-    const recognition = new SpeechRecognition(); // ここを追加
-    const speechRecognitionList = new SpeechGrammarList();
-    // recognition.grammars = speechRecognitionList; // 必要に応じて文法リストを設定
-    recognition.continuous = true; // 連続して発言を認識
-    recognition.lang = 'ja-JP'; // 日本語に設定
-    recognition.interimResults = true; // 中間結果も取得
+  let currentText = targetTextarea.value; // 既存のテキストを保持
+  let finalTranscript = ''; // 最終的な認識結果を保持する変数
 
-    micButton.addEventListener('click', () => {
-        if (micButton.classList.contains('is-recording')) {
-            recognition.stop();
-            return;
-        }
-        recognition.start();
-    });
+  recognition.onstart = () => {
+    micButton.classList.add('is-recording');
+    micButton.title = '録音中...クリックで停止';
+    targetTextarea.focus();
+    currentText = targetTextarea.value; // 録音開始時のテキストを保存
+  };
 
-    let finalTranscript = ''; // 最終的な認識結果を保持する変数
+  recognition.onresult = (event) => {
+    let interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    // 既存のテキスト + 最終結果 + 中間結果
+    targetTextarea.value = currentText + finalTranscript + interimTranscript;
+  };
 
-    recognition.onstart = () => {
-        micButton.classList.add('is-recording');
-        micButton.title = '録音中...クリックで停止';
-        targetTextarea.focus();
-    };
+  recognition.onend = () => {
+    micButton.classList.remove('is-recording');
+    micButton.title = '音声入力';
+    targetTextarea.value = currentText + finalTranscript + '\n'; // 認識終了時に改行を追加
+    finalTranscript = ''; // 最終的な認識結果をリセット
+  };
 
-    recognition.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript;
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-            }
-        }
-        // テキストエリアの値を更新（最終結果 + 中間結果）
-        targetTextarea.value = finalTranscript + interimTranscript;
-    };
-
-    recognition.onend = () => {
-        micButton.classList.remove('is-recording');
-        micButton.title = '音声入力';
-        finalTranscript = ''; // 認識終了時にリセット
-    };
-
-    recognition.onerror = (event) => {
-        micButton.classList.remove('is-recording');
-        micButton.title = '音声入力';
-        console.error('Speech recognition error:', event.error);
-        alert(`音声認識エラー: ${event.error}`);
-    };
+  recognition.onerror = (event) => {
+    micButton.classList.remove('is-recording');
+    micButton.title = '音声入力';
+    console.error('Speech recognition error:', event.error);
+    alert(`音声認識エラー: ${event.error}`);
+    finalTranscript = ''; // エラー時もリセット
+  };
 }
-
-
-
-
-
 
 
 
