@@ -515,7 +515,7 @@ footer {
 /* --- Mode Tabs --- */
 .tabs {
     display: flex;
-    margin-bottom: 40px; /* マージンを大きく */
+    margin-bottom: 20px; /* 返信モードの欄のマージンを調整 */
     align-items: center; /* Vertically align items */
 }
 
@@ -600,7 +600,7 @@ footer {
 .info-modal-content h2 {
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
+    padding-bottom: 20px;
     margin-bottom: 20px;
 }
 
@@ -613,7 +613,7 @@ footer {
 
 .info-modal-content ul {
     list-style-type: disc;
-    margin-left: 20px;
+    margin-left: -20px;
     margin-bottom: 15px;
 }
 

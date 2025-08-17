@@ -319,17 +319,15 @@ function createReplyPrompt(settings) {
 ${settings.receivedMessage || '（メッセージが入力されていません）'}
 ------------------------
 設定:
-- 役割: ${settings.userRole || '指定なし'}
-- 相手との関係性: ${settings.relationship || '指定なし'}
-- 感情の方向性 (否定的/肯定的): ${settings.sentiment}
-- 丁寧度: ${settings.politeness}
-- 返信の概算文字数: ${settings.charCount || '指定なし'}
-- 句読点: ${settings.punctuation}
-- 返信に含めるべき内容: ${settings.replyContent || '指定なし'}
-- 参照情報:
-${urlsText}
-
-文中に*や**は絶対に使用しないでください。読みにくいです。`;
+- 1.役割: ${settings.userRole || '指定なし'}
+- 2.相手との関係性: ${settings.relationship || '指定なし'}
+- 3.感情の方向性 (否定的/肯定的): ${settings.sentiment}
+- 4.丁寧度: ${settings.politeness}
+- 5.返信文の最大の文字数: ${settings.charCount || '指定なし'}
+- 6.句読点: ${settings.punctuation}
+- 7.返信に含めるべき内容: ${settings.replyContent || '指定なし'}
+- 8.参照情報:
+${urlsText}`;
 
     // settings.showExtra が「あり」の場合のみ追加指示
     if (settings.showExtra === 'あり') {
@@ -340,12 +338,13 @@ ${urlsText}
 
 -------- 引用サイト添付 --------
 返信内容に引用する情報は必ず**検索可能で信頼できる公式サイトやニュースサイト**に限定してください。
-最大3件まで、本文中で使用した箇所に対応させてください。
+最大3件まで、**文末に記載**してください。
 存在しないサイトや確認できないURLは書かないでください。`;
     }
 
     prompt += `
-
+【重要】
+設定5.で指定した**返信文の最大の文字数**は必ず守って下さい。
 以上の情報を用いて、自然で適切な返信文を作成してください。
 
 [REPLY_START]
